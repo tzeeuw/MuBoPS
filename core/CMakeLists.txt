@@ -4,4 +4,4 @@ set(SOURCE_FILES
 add_executable(core ${SOURCE_FILES})
 
 
-target_link_libraries(core PUBLIC glfw glad)
+target_link_libraries(core PUBLIC glfw glad glm)

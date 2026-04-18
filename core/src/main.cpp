@@ -1,25 +1,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <fstream>
 #include <cmath>
+#include <string>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-// shaders
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\0";
+unsigned int loadShader(const char* Path, GLenum shaderType);
 
 
 int main() {
@@ -52,31 +41,9 @@ int main() {
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    // make the shaders
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    // check if shader was succesfully compiled
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    // create the fragment shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    // check compilation
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
+    // load the shaders
+    unsigned int vertexShader = loadShader("core/shaders/triangle.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = loadShader("core/shaders/triangle.frag", GL_FRAGMENT_SHADER);
 
     // link shaders to shader program
     unsigned int shaderProgram = glCreateProgram();
@@ -85,6 +52,9 @@ int main() {
     glLinkProgram(shaderProgram);
 
     // check compilation
+    int success;
+    char infoLog[512];
+
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
@@ -150,4 +120,43 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+}
+
+
+unsigned int loadShader(const char* Path, GLenum shaderType) {
+
+    // open file
+    std::ifstream shaderFile(Path);
+    if (!shaderFile.is_open()) {
+        std::cout << "Failed to open shader file: " << Path << std::endl;
+        return 0;
+    }
+
+    // read shader file into string
+    std::string line;
+    std::string fileContents;
+    while (std::getline(shaderFile, line)) {
+        fileContents += line + "\n";
+    }
+
+    // cast string to const char*
+    const char* shaderSource = fileContents.c_str();
+
+    // create the shader
+    unsigned int shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &shaderSource, NULL);
+    glCompileShader(shader);
+
+    // check compilation
+    int success;
+    char infoLog[512];
+
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << Path << "\n" << infoLog << std::endl;
+    }
+
+    // return the shader ID
+    return shader;
 }
