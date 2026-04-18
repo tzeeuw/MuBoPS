@@ -6,13 +6,13 @@ The goal is to simulate systems from small scale (particle physics) to large sca
 * None
 
 ### Features in developments:
-* Structure of code based on fluid dynamics
+* Structure of code based on accretion disks
     * Centralized Body
     * Single frame calculations
 
 ### Planned features:
 * Multi frame calculations (i.e. time dependence)
-* Accretion disks
+* Fluid dynamics
 * Atomic wavefunctions
 
 The project will be open source and will be build in C++ and Python.
