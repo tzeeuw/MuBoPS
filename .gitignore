@@ -18,4 +18,4 @@ dist/
 
 
 # remove specific sandbox folders
-sandbox/opengl-testing/
+sandbox/*/
