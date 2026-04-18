@@ -1,5 +1,5 @@
 add_executable(sandbox
-    main.cpp
+    opengl-testing/twoTriangles.cpp
 )
 
 target_link_libraries(sandbox PUBLIC

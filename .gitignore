@@ -15,3 +15,7 @@ wheels/
 # Build files
 build/
 dist/
+
+
+# remove specific sandbox folders
+sandbox/opengl-testing/
