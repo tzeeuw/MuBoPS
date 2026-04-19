@@ -43,14 +43,20 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // load the shaders
-    unsigned int vertexShader = loadShader("core/shaders/triangle.vert", GL_VERTEX_SHADER);
-    unsigned int fragmentShader = loadShader("core/shaders/triangle.frag", GL_FRAGMENT_SHADER);
+    unsigned int vertexShader = loadShader("core/shaders/point.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = loadShader("core/shaders/point.frag", GL_FRAGMENT_SHADER);
+    unsigned int trailShader = loadShader("core/shaders/trail.frag", GL_FRAGMENT_SHADER);
 
     // link shaders to shader program
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+
+    unsigned int trailShaderProgram = glCreateProgram();
+    glAttachShader(trailShaderProgram, vertexShader);
+    glAttachShader(trailShaderProgram, trailShader);
+    glLinkProgram(trailShaderProgram);
 
     // check compilation
     int success;
@@ -75,17 +81,28 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
     glPointSize(10.0f);
+
+    // enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    double step = 0.0;
+
+    int step = 0;
+    int trailIndex = 0;
+    const int trailPoints = 300;
+    const int trailSize = trailPoints * 3;
+    float trail[trailSize];
 
     // for now we create a single body that moves in a circle
     ClassicalBody body;
     body.setName("Test Body");
     body.setMass(1.0);
     body.setRadius(0.1);
-    body.setPosition({0.5, 0.5, 0.0});
-    body.setVelocity({0.1, 0.0, 0.0});
+    body.setPosition({0.5, 0.0, 0.0});
+    body.setVelocity({0.0, 0.3, 0.0});
+    body.setAcceleration({0.0, 0.0, 0.0});
 
 
     // render loop
@@ -97,13 +114,23 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT); 
 
         // draw a moving point that moves in a circle
-        glUseProgram(shaderProgram);
-        step += 0.001;
-        body.update(0.001);
-
+        step += 1;
+        body.update(0.01);
         glm::vec3 position = glm::vec3(body.getPosition());
+        
+        if (step % 50 == 0) {
+            trail[trailIndex] = position.x;
+            trail[trailIndex + 1] = position.y;
+            trail[trailIndex + 2] = position.z;
+            trailIndex = (trailIndex + 3) % (trailSize);
+        }
+        
+        glUseProgram(trailShaderProgram);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(trail), trail, GL_DYNAMIC_DRAW);
+        glDrawArrays(GL_POINTS, 0, trailPoints);
+        
+        glUseProgram(shaderProgram);
         glBufferData(GL_ARRAY_BUFFER, sizeof(position), &position, GL_DYNAMIC_DRAW);
-
         glDrawArrays(GL_POINTS, 0, 1);
 
         glfwSwapBuffers(window);

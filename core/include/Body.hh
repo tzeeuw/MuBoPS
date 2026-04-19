@@ -27,6 +27,11 @@ class Body {
         }
         const glm::dvec3& getVelocity() {return this->velocity;}
 
+        void setAcceleration(glm::dvec3 acceleration) {
+            this->acceleration = acceleration;
+        }
+        const glm::dvec3& getAcceleration() {return this->acceleration;}
+
         void setRadius(double radius) {this->radius = radius;}
         double getRadius() {return this->radius;}
 
@@ -40,6 +45,7 @@ class Body {
     
         glm::dvec3 position;
         glm::dvec3 velocity;
+        glm::dvec3 acceleration;
 
 };
     
