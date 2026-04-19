@@ -17,13 +17,13 @@ class Body {
         void setMass(double mass) {this->mass = mass;}
         double getMass() {return this->mass;}
 
-        void setPosition(double x, double y, double z) {
-            this->position = {x, y, z};
+        void setPosition(glm::dvec3 position) {
+            this->position = position;
         }
         const glm::dvec3& getPosition() {return this->position;}
 
-        void setVelocity(double x, double y, double z) {
-            this->velocity = {x, y, z};
+        void setVelocity(glm::dvec3 velocity) {
+            this->velocity = velocity;
         }
         const glm::dvec3& getVelocity() {return this->velocity;}
 

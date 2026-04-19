@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cmath>
 #include <string>
+#include <ClassicalBody.hh>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -76,9 +77,16 @@ int main() {
     glEnableVertexAttribArray(0);
     glPointSize(10.0f);
     
-    int step = 0;
-    float angle = 0.0f;
-    int maxSteps = 360;
+    double step = 0.0;
+
+    // for now we create a single body that moves in a circle
+    ClassicalBody body;
+    body.setName("Test Body");
+    body.setMass(1.0);
+    body.setRadius(0.1);
+    body.setPosition({0.5, 0.5, 0.0});
+    body.setVelocity({0.1, 0.0, 0.0});
+
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -90,14 +98,11 @@ int main() {
 
         // draw a moving point that moves in a circle
         glUseProgram(shaderProgram);
-        step = (step + 1) % maxSteps;
-        angle = (float)step / maxSteps * 2.0f * 3.1415926f;
-        float x = 0.5f * cos(angle);
-        float y = 0.5f * sin(angle);
+        step += 0.001;
+        body.update(0.001);
 
-
-        float point[] = {x, y, 0.0f};
-        glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_DYNAMIC_DRAW);
+        glm::vec3 position = glm::vec3(body.getPosition());
+        glBufferData(GL_ARRAY_BUFFER, sizeof(position), &position, GL_DYNAMIC_DRAW);
 
         glDrawArrays(GL_POINTS, 0, 1);
 
