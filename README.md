@@ -3,16 +3,14 @@ Multi-Body Physics Simulation tool (MuBoPS) is a project aimed to simulated Mult
 The goal is to simulate systems from small scale (particle physics) to large scale (accretion disks or black hole mergers), based on a centralized system.
 
 ### Features:
-* None
+* Centralized Body
+    * Classical body used for classical computations
 
 ### Features in developments:
-* Structure of code based on accretion disks
-    * Centralized Body
-    * Single frame calculations
+* Accretion disks 
 
 ### Planned features:
-* Multi frame calculations (i.e. time dependence)
+* Atomic and molecular wavefunctions
 * Fluid dynamics
-* Atomic wavefunctions
 
 The project will be open source and will be build in C++ and Python.
