@@ -1,6 +1,7 @@
 set(SOURCE_FILES
     src/main.cpp
-    src/ClassicalBody.cpp)
+    src/ClassicalBody.cpp
+    src/Simulation.cpp)
 
 add_executable(core ${SOURCE_FILES})
 

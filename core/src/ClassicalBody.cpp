@@ -25,3 +25,9 @@ void ClassicalBody::update(double dt) {
     this->setVelocity(newVelocity);
     this->setAcceleration(newAcceleration);
 }
+
+
+void ClassicalBody::addTrailPoint(const glm::dvec3& position) {
+    trail[trailIndex] = (static_cast<glm::vec3>(position));
+    trailIndex = (trailIndex + 1) % (trailPoints);
+}

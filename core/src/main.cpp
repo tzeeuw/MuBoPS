@@ -5,6 +5,8 @@
 #include <cmath>
 #include <string>
 #include <ClassicalBody.hh>
+#include <Simulation.hh>
+#include <memory>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -90,19 +92,26 @@ int main() {
     
 
     int step = 0;
-    int trailIndex = 0;
-    const int trailPoints = 300;
-    const int trailSize = trailPoints * 3;
-    float trail[trailSize];
+    std::vector<std::unique_ptr<Body>> bodies;
 
     // for now we create a single body that moves in a circle
-    ClassicalBody body;
-    body.setName("Test Body");
-    body.setMass(1.0);
-    body.setRadius(0.1);
-    body.setPosition({0.5, 0.0, 0.0});
-    body.setVelocity({0.0, 0.3, 0.0});
-    body.setAcceleration({0.0, 0.0, 0.0});
+    auto body = std::make_unique<ClassicalBody>();
+    body->setPosition({0.5, 0.0, 0.0});
+    body->setVelocity({0.0, 0.3, 0.0});
+    body->setAcceleration({0.0, 0.0, 0.0});
+    bodies.push_back(std::move(body));
+
+    // test a second body
+    // they are now pointers so not using . but ->
+    auto body2 = std::make_unique<ClassicalBody>();
+    body2->setPosition({-0.5, 0.0, 0.0});
+    body2->setVelocity({0.0, -0.3, 0.0});
+    body2->setAcceleration({0.0, 0.0, 0.0});
+    bodies.push_back(std::move(body2));
+
+
+    Simulation sim;
+    sim.addBodies(std::move(bodies));
 
 
     // render loop
@@ -115,23 +124,24 @@ int main() {
 
         // draw a moving point that moves in a circle
         step += 1;
-        body.update(0.01);
-        glm::vec3 position = glm::vec3(body.getPosition());
-        
+        sim.update(0.01);
+        std::vector<glm::vec3> positions = sim.getPositions();
+
         if (step % 50 == 0) {
-            trail[trailIndex] = position.x;
-            trail[trailIndex + 1] = position.y;
-            trail[trailIndex + 2] = position.z;
-            trailIndex = (trailIndex + 3) % (trailSize);
+            sim.addTrailPoints();
         }
         
+        std::vector<glm::vec3> trail = sim.getTrails();
+        int trailPoints = static_cast<int>(trail.size());
+        int points = static_cast<int>(positions.size());
+
         glUseProgram(trailShaderProgram);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(trail), trail, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, trail.size() * sizeof(glm::vec3), trail.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, trailPoints);
         
         glUseProgram(shaderProgram);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(position), &position, GL_DYNAMIC_DRAW);
-        glDrawArrays(GL_POINTS, 0, 1);
+        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_DYNAMIC_DRAW);
+        glDrawArrays(GL_POINTS, 0, points);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
