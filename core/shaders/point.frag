@@ -14,7 +14,22 @@ void main()
     }
 
     float normalizedSpeed = (vSpeed - minSpeed) / (maxSpeed - minSpeed);
-    float logSpeed = log(normalizedSpeed + 1.0); // Add 1 to avoid log(0)
-    FragColor = vec4(logSpeed, 0.0f, 0.0f, 1.0f);
+
+    vec4 color;
+
+    if (normalizedSpeed < 0.5) {
+        normalizedSpeed = normalizedSpeed / 0.5;
+        color = mix(vec4(0.565f, 0.835f, 1.0f, 1.0f), vec4(1.0f, 0.3f, 0.0f, 1.0f), normalizedSpeed);
+    }
+    else if (normalizedSpeed > 0.5 && normalizedSpeed < 0.8) {
+        normalizedSpeed = (normalizedSpeed - 0.5) / (0.8 - 0.5);
+        color = mix(vec4(1.0f, 0.3f, 0.0f, 1.0f), vec4(1.0f, 1.0f, 0.0f, 1.0f), normalizedSpeed);
+    }
+    else if (normalizedSpeed > 0.8) {
+        normalizedSpeed = (normalizedSpeed - 0.8) / (1.0 - 0.8);
+        color = mix(vec4(1.0f, 1.0f, 0.0f, 1.0f), vec4(1.0f, 1.0f, 1.0f, 1.0f), normalizedSpeed);
+    }
+
+    FragColor = color;
 
 }
