@@ -4,7 +4,7 @@ The goal is to simulate systems from small scale (particle physics) to large sca
 
 ## Getting Started
 ### Installing the project
-MacOS is currently not supported for this project but is planned \
+MacOS is currently not supported for this project but is planned. \
 To install the project, cmake or any other C++ compiler is required. OpenGL is also required for the project to work as it is used for visualisation. Other external libraries are included in the project and do not require seperate installation. \
 The example below is based on cmake. \
 First clone the repository

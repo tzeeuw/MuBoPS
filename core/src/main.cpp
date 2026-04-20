@@ -7,6 +7,7 @@
 #include <ClassicalBody.hh>
 #include <Simulation.hh>
 #include <memory>
+#include <random>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -91,23 +92,28 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
 
+    // for now generate random body positions
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<double> angleDist(0, 2*3.14159);
+    std::uniform_real_distribution<double> radDist(0.1, 0.8);
+
     int step = 0;
     std::vector<std::unique_ptr<Body>> bodies;
+    for (int i = 0; i < 10000; i++){
+        auto body = std::make_unique<ClassicalBody>(15);
+        double angle = angleDist(mt);
+        double radius = radDist(mt);
+        glm::dvec3 position = glm::dvec3(std::cos(angle) * radius, std::sin(angle) * radius, 0.0);
+        body->setPosition(position);
 
-    // for now we create a single body that moves in a circle
-    auto body = std::make_unique<ClassicalBody>();
-    body->setPosition({0.5, 0.0, 0.0});
-    body->setVelocity({0.0, 0.3, 0.0});
-    body->setAcceleration({0.0, 0.0, 0.0});
-    bodies.push_back(std::move(body));
-
-    // test a second body
-    // they are now pointers so not using . but ->
-    auto body2 = std::make_unique<ClassicalBody>();
-    body2->setPosition({-0.5, 0.0, 0.0});
-    body2->setVelocity({0.0, -0.3, 0.0});
-    body2->setAcceleration({0.0, 0.0, 0.0});
-    bodies.push_back(std::move(body2));
+        // calculate the velocity size
+        double velSize = std::sqrt(6.67430e-11 * 5.972e8/radius)/radius;
+        glm::dvec3 velocity = glm::dvec3(-position[1], position[0], position[2]) * velSize;
+        body->setVelocity(velocity);
+        body->setAcceleration({0.0, 0.0, 0.0});
+        bodies.push_back(std::move(body));
+    }
 
 
     Simulation sim;
@@ -118,30 +124,33 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         // input
         processInput(window);
-        // rendering commands here
+
+        // background color
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT); 
 
         // draw a moving point that moves in a circle
         step += 1;
-        sim.update(0.01);
-        std::vector<glm::vec3> positions = sim.getPositions();
-
-        if (step % 50 == 0) {
-            sim.addTrailPoints();
+        for (int i = 0; i < 10; i++){
+            sim.update(0.001);
         }
-        
-        std::vector<glm::vec3> trail = sim.getTrails();
-        int trailPoints = static_cast<int>(trail.size());
+        std::vector<glm::vec3> positions = sim.getPositions();
         int points = static_cast<int>(positions.size());
 
-        glUseProgram(trailShaderProgram);
-        glBufferData(GL_ARRAY_BUFFER, trail.size() * sizeof(glm::vec3), trail.data(), GL_DYNAMIC_DRAW);
-        glDrawArrays(GL_POINTS, 0, trailPoints);
-        
         glUseProgram(shaderProgram);
         glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, points);
+        
+        // if (step % 50 == 0) {
+        //     sim.addTrailPoints();
+        // }
+        
+        // std::vector<glm::vec3> trail = sim.getTrails();
+        // int trailPoints = static_cast<int>(trail.size());
+
+        // glUseProgram(trailShaderProgram);
+        // glBufferData(GL_ARRAY_BUFFER, trail.size() * sizeof(glm::vec3), trail.data(), GL_DYNAMIC_DRAW);
+        // glDrawArrays(GL_POINTS, 0, trailPoints);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
