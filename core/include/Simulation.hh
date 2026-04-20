@@ -21,7 +21,10 @@ class Simulation {
         void removeBody(std::unique_ptr<Body>& body);
         void update(double dt);
 
+        std::vector<glm::vec3> getVelocities();
+        std::vector<float> getSpeeds();
         std::vector<glm::vec3> getPositions();
+        std::vector<glm::vec4> getPositionsAndSpeed();
         void addTrailPoints();
         std::vector<glm::vec3> getTrails();
 

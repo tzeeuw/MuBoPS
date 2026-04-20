@@ -38,6 +38,37 @@ std::vector<glm::vec3> Simulation::getPositions() {
     return positions;
 }
 
+std::vector<glm::vec3> Simulation::getVelocities() {
+    std::vector<glm::vec3> velocities;
+    for (auto& body: bodies) {
+        glm::vec3 velocity = static_cast<glm::vec3>(body->getVelocity());
+        velocities.push_back(velocity);
+    }
+    return velocities;
+}
+
+std::vector<float> Simulation::getSpeeds() {
+    std::vector<float> speeds;
+    for (auto& body: bodies) {
+        float speed = body->getSpeed();
+        speeds.push_back(speed);
+    }
+    return speeds;
+}
+
+
+std::vector<glm::vec4> Simulation::getPositionsAndSpeed() {
+    std::vector<glm::vec4> positionsAndSpeed;
+
+    for (auto& body: bodies) {
+        glm::vec3 position = static_cast<glm::vec3>(body->getPosition());
+        float speed = body->getSpeed();
+        positionsAndSpeed.push_back(glm::vec4(position, speed));
+    }
+
+    return positionsAndSpeed;
+}
+
 
 std::vector<glm::vec3> Simulation::getTrails() {
     std::vector<glm::vec3> trails;

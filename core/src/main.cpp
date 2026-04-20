@@ -82,8 +82,10 @@ int main() {
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
     glPointSize(10.0f);
 
@@ -119,6 +121,20 @@ int main() {
     Simulation sim;
     sim.addBodies(std::move(bodies));
 
+    // set the color range for the particles
+
+    std::vector<float> speeds = sim.getSpeeds();
+    auto speedValue = std::minmax_element(speeds.begin(), speeds.end());
+    float minSpeedValue = *speedValue.first;
+    float maxSpeedValue = *speedValue.second;
+
+
+
+    glUseProgram(shaderProgram);
+    int minLoc = glGetUniformLocation(shaderProgram, "minSpeed");
+    int maxLoc = glGetUniformLocation(shaderProgram, "maxSpeed");
+    glUniform1f(minLoc, minSpeedValue);
+    glUniform1f(maxLoc, maxSpeedValue);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -134,11 +150,11 @@ int main() {
         for (int i = 0; i < 10; i++){
             sim.update(0.001);
         }
-        std::vector<glm::vec3> positions = sim.getPositions();
-        int points = static_cast<int>(positions.size());
+        std::vector<glm::vec4> positionsAndSpeeds = sim.getPositionsAndSpeed();
+        int points = static_cast<int>(positionsAndSpeeds.size());
 
         glUseProgram(shaderProgram);
-        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, positionsAndSpeeds.size() * sizeof(glm::vec4), positionsAndSpeeds.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, points);
         
         // if (step % 50 == 0) {

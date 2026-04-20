@@ -26,6 +26,8 @@ class Body {
             this->velocity = velocity;
         }
         const glm::dvec3& getVelocity() {return this->velocity;}
+        float getSpeed() {return static_cast<float>(glm::length(this->getVelocity()));}
+
 
         void setAcceleration(glm::dvec3 acceleration) {
             this->acceleration = acceleration;

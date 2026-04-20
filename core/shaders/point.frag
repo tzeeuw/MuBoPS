@@ -1,4 +1,9 @@
 #version 330 core
+in float vSpeed;
+
+uniform float minSpeed;
+uniform float maxSpeed;
+
 out vec4 FragColor;
 void main()
 {
@@ -7,6 +12,9 @@ void main()
     if (f > 0.25) {
         discard;
     }
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+
+    float normalizedSpeed = (vSpeed - minSpeed) / (maxSpeed - minSpeed);
+    float logSpeed = log(normalizedSpeed + 1.0); // Add 1 to avoid log(0)
+    FragColor = vec4(logSpeed, 0.0f, 0.0f, 1.0f);
 
 }
