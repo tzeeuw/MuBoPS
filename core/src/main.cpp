@@ -27,7 +27,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // create the winow object
-    GLFWwindow* window = glfwCreateWindow(800, 600, "MuBoPS OpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "MuBoPS OpenGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -41,7 +41,7 @@ int main() {
         return -1;
     }
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, 800, 800);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -98,14 +98,16 @@ int main() {
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> angleDist(0, 2*3.14159);
-    std::uniform_real_distribution<double> radDist(0.1, 0.8);
+    std::uniform_real_distribution<double> radDist(0, 1);
 
     int step = 0;
     std::vector<std::unique_ptr<Body>> bodies;
+    double minRadius = 0.1;
+    double maxRadius = 0.8;
     for (int i = 0; i < 10000; i++){
         auto body = std::make_unique<ClassicalBody>(15);
         double angle = angleDist(mt);
-        double radius = radDist(mt);
+        double radius = std::sqrt(minRadius*minRadius + radDist(mt)*(maxRadius*maxRadius - minRadius*minRadius));
         glm::dvec3 position = glm::dvec3(std::cos(angle) * radius, std::sin(angle) * radius, 0.0);
         body->setPosition(position);
 
@@ -142,7 +144,7 @@ int main() {
         processInput(window);
 
         // background color
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT); 
 
         // draw a moving point that moves in a circle
