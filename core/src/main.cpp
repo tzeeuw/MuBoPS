@@ -8,11 +8,31 @@
 #include <Simulation.hh>
 #include <memory>
 #include <random>
+#include <algorithm>
+#include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 unsigned int loadShader(const char* Path, GLenum shaderType);
+void onMouseClick(GLFWwindow* window, int i, int d, int k);
+void onCursorMove(GLFWwindow* window, double xpos, double ypos);
+
+
+bool mousePressed = false;
+bool notPressed = true;
+float lastX = 400.0f;
+float lastY = 400.0f;
+float pitch = 0.0f;
+float yaw = 90.0f;
+float SCR_WIDTH = 800.0;
+float SCR_HEIGHT = 800.0;
+float fov = 45.0;
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+float cameraDistance = glm::length(cameraPos);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
 int main() {
@@ -27,7 +47,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // create the winow object
-    GLFWwindow* window = glfwCreateWindow(800, 800, "MuBoPS OpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(int(SCR_WIDTH), int(SCR_HEIGHT), "MuBoPS OpenGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -41,9 +61,12 @@ int main() {
         return -1;
     }
 
-    glViewport(0, 0, 800, 800);
+    glViewport(0, 0, int(SCR_WIDTH), int(SCR_HEIGHT));
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetMouseButtonCallback(window, onMouseClick);
+    glfwSetCursorPosCallback(window, onCursorMove);
+
 
     // load the shaders
     unsigned int vertexShader = loadShader("core/shaders/point.vert", GL_VERTEX_SHADER);
@@ -104,7 +127,7 @@ int main() {
     std::vector<std::unique_ptr<Body>> bodies;
     double minRadius = 0.1;
     double maxRadius = 0.8;
-    for (int i = 0; i < 10000; i++){
+    for (int i = 0; i < 5000; i++){
         auto body = std::make_unique<ClassicalBody>(15);
         double angle = angleDist(mt);
         double radius = std::sqrt(minRadius*minRadius + radDist(mt)*(maxRadius*maxRadius - minRadius*minRadius));
@@ -133,10 +156,14 @@ int main() {
 
 
     glUseProgram(shaderProgram);
-    int minLoc = glGetUniformLocation(shaderProgram, "minSpeed");
-    int maxLoc = glGetUniformLocation(shaderProgram, "maxSpeed");
+    unsigned int minLoc = glGetUniformLocation(shaderProgram, "minSpeed");
+    unsigned int maxLoc = glGetUniformLocation(shaderProgram, "maxSpeed");
     glUniform1f(minLoc, minSpeedValue);
     glUniform1f(maxLoc, maxSpeedValue);
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+    unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+    glm::mat4 trans = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -156,9 +183,17 @@ int main() {
         int points = static_cast<int>(positionsAndSpeeds.size());
 
         glUseProgram(shaderProgram);
+
         glBufferData(GL_ARRAY_BUFFER, positionsAndSpeeds.size() * sizeof(glm::vec4), positionsAndSpeeds.data(), GL_DYNAMIC_DRAW);
-        glDrawArrays(GL_POINTS, 0, points);
+
+        projection = glm::perspective(glm::radians(fov), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+        trans = glm::lookAt(cameraPos, glm::vec3(0.0f), cameraUp);
+
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
         
+        glDrawArrays(GL_POINTS, 0, points);
+
         // if (step % 50 == 0) {
         //     sim.addTrailPoints();
         // }
@@ -188,6 +223,49 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+}
+
+void onMouseClick(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT){
+        if (action == GLFW_PRESS) {
+            mousePressed = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            mousePressed = false;
+            notPressed = true;
+        }
+    }
+    
+}
+
+void onCursorMove(GLFWwindow* window, double xpos, double ypos){
+    if (mousePressed) {
+        if (notPressed) {
+            lastX = xpos;
+            lastY = ypos;
+            notPressed = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;
+
+        lastX = xpos;
+        lastY = ypos;
+
+        const float sensitivity = 0.1f;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch -= yoffset;
+
+        glm::vec3 direction;
+        direction.x = cameraDistance*cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = cameraDistance*sin(glm::radians(pitch));
+        direction.z = cameraDistance*sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        cameraPos = direction;
     }
 }
 

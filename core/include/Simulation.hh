@@ -2,7 +2,7 @@
 #include <Body.hh>
 #include <vector>
 #include <memory>
-
+#include <algorithm>
 
 class Simulation {
     public:
