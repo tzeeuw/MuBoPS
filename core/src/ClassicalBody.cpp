@@ -32,3 +32,12 @@ void ClassicalBody::addTrailPoint(const glm::dvec3& position) {
     trail[trailIndex] = (static_cast<glm::vec3>(position));
     trailIndex = (trailIndex + 1) % (trailPoints);
 }
+
+
+std::vector<glm::vec4> ClassicalBody::getRenderData() {
+
+    glm::vec3 position = static_cast<glm::vec3>(getPosition());
+    float speed = getSpeed();
+
+    return {glm::vec4(position, speed)};
+}

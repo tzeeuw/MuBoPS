@@ -1,8 +1,8 @@
 #version 330 core
-in float vSpeed;
+in float vValue;
 
-uniform float minSpeed;
-uniform float maxSpeed;
+// uniform float minSpeed;
+// uniform float maxSpeed;
 
 out vec4 FragColor;
 void main()
@@ -13,9 +13,10 @@ void main()
         discard;
     }
 
-    float normalizedSpeed = (vSpeed - minSpeed) / (maxSpeed - minSpeed);
+//    float normalizedSpeed = (vSpeed - minSpeed) / (maxSpeed - minSpeed);
 
     vec4 color;
+    float normalizedSpeed = vValue;
 
 //    if (normalizedSpeed < 0.5) {
 //        normalizedSpeed = normalizedSpeed / 0.5;

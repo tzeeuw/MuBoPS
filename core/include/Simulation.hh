@@ -24,7 +24,9 @@ class Simulation {
         std::vector<glm::vec3> getVelocities();
         std::vector<float> getSpeeds();
         std::vector<glm::vec3> getPositions();
-        std::vector<glm::vec4> getPositionsAndSpeed();
+        // std::vector<glm::vec4> getPositionsAndSpeed();
+        std::vector<glm::vec4> getClassicalRenderData();
+        std::vector<glm::vec4> getQuantumRenderData();
         void addTrailPoints();
         std::vector<glm::vec3> getTrails();
 

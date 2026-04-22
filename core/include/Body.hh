@@ -39,6 +39,7 @@ class Body {
 
 
         virtual void update(double dt) = 0;
+        virtual std::vector<glm::vec4> getRenderData() = 0;
 
     private:
         std::string name;

@@ -14,6 +14,8 @@ class ClassicalBody : public Body {
         const std::vector<glm::vec3>& getTrail() const {return this->trail;}
         void addTrailPoint(const glm::dvec3& position);
 
+        std::vector<glm::vec4>  getRenderData() override;
+
     private:
         int trailIndex = 0;
         int trailPoints;
