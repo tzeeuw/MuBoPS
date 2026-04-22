@@ -36,9 +36,9 @@ This project is made as a hobby, the goal is to be accurate, but also have good 
 
 ### Features in developments:
 * Accretion disks 
+* Atomic and molecular wavefunctions
 
 ### Planned features:
-* Atomic and molecular wavefunctions
 * Fluid dynamics
 
 ### Far Future planned features:
