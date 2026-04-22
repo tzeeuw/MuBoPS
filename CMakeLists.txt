@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(mubops)
+project(mubops VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
