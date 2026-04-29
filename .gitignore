@@ -18,6 +18,9 @@ dist/
 *.so
 *.a
 
+# docs
+docs/
+
 
 # remove specific sandbox folders
 sandbox/*/
