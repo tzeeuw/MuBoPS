@@ -24,7 +24,7 @@ On Windows
 ```
 On Linux
 ```
-.\build\core.exe
+.\build\core\Debug\core
 ```
 
 ## Project information
