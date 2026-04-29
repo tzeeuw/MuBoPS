@@ -11,7 +11,6 @@ void ClassicalBody::update(double dt) {
     glm::dvec3 velocity = this->getVelocity();
     glm::dvec3 position = this->getPosition();
     glm::dvec3 acceleration = this->getAcceleration();
-
     double G = 6.67430e-11; // gravitational constant
     double M = 5.972e8;
 

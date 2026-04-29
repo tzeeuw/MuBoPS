@@ -21,4 +21,6 @@ target_link_libraries(core PRIVATE core_lib)
 
 pybind11_add_module(mubops_core src/bindings.cpp)
 target_link_libraries(mubops_core PRIVATE core_lib)
-set_target_properties(mubops_core PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/mubops)
+set_target_properties(mubops_core PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/src/mubops
+                                LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/src/mubops
+                                LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/src/mubops)

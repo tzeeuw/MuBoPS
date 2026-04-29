@@ -6,10 +6,10 @@
 #include <QuantumBody.hh>
 #include <iostream>
 
-void Simulation::removeBody(std::unique_ptr<Body>& body) {
+void Simulation::removeBody(std::shared_ptr<Body>& body) {
 
     // find the body in the vector and remove it
-    auto it = std::find_if(bodies.begin(), bodies.end(), [&](const std::unique_ptr<Body>& b) {
+    auto it = std::find_if(bodies.begin(), bodies.end(), [&](const std::shared_ptr<Body>& b) {
         return b.get() == body.get();
     });
 

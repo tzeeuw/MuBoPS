@@ -27,16 +27,16 @@ class Simulation {
 
         /// @name Body management
         /// @{
-        void addBody(std::unique_ptr<Body> body) {
-            bodies.push_back(std::move(body));
+        void addBody(std::shared_ptr<Body> body) {
+            bodies.push_back(body);
         }
-        void addBodies(std::vector<std::unique_ptr<Body>> newBodies){
+        void addBodies(std::vector<std::shared_ptr<Body>> newBodies){
             for (auto& body: newBodies) {
-                addBody(std::move(body));
+                addBody(body);
             }
         };
         
-        void removeBody(std::unique_ptr<Body>& body);
+        void removeBody(std::shared_ptr<Body>& body);
         /// @}
 
 
@@ -51,5 +51,5 @@ class Simulation {
         /// @}
 
     private:
-        std::vector<std::unique_ptr<Body>> bodies;      ///< Collection of all bodies in the simulation
+        std::vector<std::shared_ptr<Body>> bodies;      ///< Collection of all bodies in the simulation
     };
