@@ -1,3 +1,9 @@
+## [0.2.1] - 2026-04-28
+## Added
+- pointsize rendering based on camera distance
+
+
+
 ## [0.2.0] - 2026-04-29
 ## Added
 - Added python bindings for classical bodies simulation
