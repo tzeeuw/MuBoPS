@@ -17,6 +17,8 @@ build/
 dist/
 *.so
 *.a
+*.pyd
+*.pdb
 
 # docs
 docs/

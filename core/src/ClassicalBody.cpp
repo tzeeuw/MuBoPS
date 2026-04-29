@@ -6,6 +6,7 @@
 
 
 void ClassicalBody::update(double dt) {
+
     // update position using veloctity
     glm::dvec3 velocity = this->getVelocity();
     glm::dvec3 position = this->getPosition();
@@ -32,6 +33,8 @@ void ClassicalBody::update(double dt) {
 
 
 void ClassicalBody::addTrailPoint(const glm::dvec3& position) {
+
+    // add trail points based on circular map
     trail[trailIndex] = (static_cast<glm::vec3>(position));
     trailIndex = (trailIndex + 1) % (trailPoints);
 }
@@ -39,6 +42,7 @@ void ClassicalBody::addTrailPoint(const glm::dvec3& position) {
 
 std::vector<glm::vec4> ClassicalBody::getRenderData() {
 
+    // get position and speed for rendering
     glm::vec3 position = static_cast<glm::vec3>(getPosition());
     float speed = getSpeed();
 
