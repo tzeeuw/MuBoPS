@@ -227,12 +227,6 @@ void Renderer::setupObjects(){
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     
-    glPointSize(10.0f);
-    
-    // enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
     // add objects to the map
     vertexObjects["VBO"] = VBO;
     vertexObjects["VAO"] = VAO;
@@ -242,24 +236,33 @@ void Renderer::setupObjects(){
 void Renderer::setupCamera(){
 
     // setup camera projection and view matrices
-    cameraLoc["classical"].first = glGetUniformLocation(shaderPrograms["classical"], "transform");
-    cameraLoc["classical"].second = glGetUniformLocation(shaderPrograms["classical"], "projection");
-    cameraLoc["quantum"].first = glGetUniformLocation(shaderPrograms["quantum"], "transform");
-    cameraLoc["quantum"].second = glGetUniformLocation(shaderPrograms["quantum"], "projection");
+    cameraLoc["classical"].transform = glGetUniformLocation(shaderPrograms["classical"], "transform");
+    cameraLoc["classical"].projection = glGetUniformLocation(shaderPrograms["classical"], "projection");
+    cameraLoc["classical"].cameraPos = glGetUniformLocation(shaderPrograms["classical"], "cameraPos");
+    cameraLoc["quantum"].transform = glGetUniformLocation(shaderPrograms["quantum"], "transform");
+    cameraLoc["quantum"].projection = glGetUniformLocation(shaderPrograms["quantum"], "projection");
+    cameraLoc["quantum"].cameraPos = glGetUniformLocation(shaderPrograms["quantum"], "cameraPos");
 }
 
-void Renderer::updateCamera(unsigned int transformLoc, unsigned int projectionLoc){
+void Renderer::updateCamera(ShaderUniforms uniforms){
 
     // update the camera projection and view matrices in the shader
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+    glUniformMatrix4fv(uniforms.projection, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(uniforms.transform, 1, GL_FALSE, glm::value_ptr(trans));
+    glUniform3fv(uniforms.cameraPos, 1, glm::value_ptr(cameraPos));
 }
 
 
 
 int Renderer::startRenderLoop() {
     
-    
+    // enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // enable point size based on distance
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
     while (!glfwWindowShouldClose(window)) {
         
         processInput(window);
@@ -281,7 +284,7 @@ int Renderer::startRenderLoop() {
         int pointsClassical = static_cast<int>(classicalRenderData.size());
         
         glUseProgram(shaderPrograms["classical"]);
-        updateCamera(cameraLoc["classical"].first, cameraLoc["classical"].second);
+        updateCamera(cameraLoc["classical"]);
         
         glBufferData(GL_ARRAY_BUFFER, classicalRenderData.size() * sizeof(glm::vec4), classicalRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsClassical);
@@ -292,7 +295,7 @@ int Renderer::startRenderLoop() {
         int pointsQuantum = static_cast<int>(quantumRenderData.size());
         
         glUseProgram(shaderPrograms["quantum"]);
-        updateCamera(cameraLoc["quantum"].first, cameraLoc["quantum"].second);
+        updateCamera(cameraLoc["quantum"]);
         
         glBufferData(GL_ARRAY_BUFFER, quantumRenderData.size() * sizeof(glm::vec4), quantumRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsQuantum);

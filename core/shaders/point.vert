@@ -6,9 +6,12 @@ out float vValue;
 
 uniform mat4 transform;
 uniform mat4 projection;
+uniform vec3 cameraPos;
 
 void main()
 {
    gl_Position = projection * transform * vec4(aPos, 1.0);
+   float distance = length(cameraPos - aPos);
+   gl_PointSize = 20.0f / distance;
    vValue = aSpeed;
 }

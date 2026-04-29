@@ -26,6 +26,13 @@
  * The class interacts with the Simulation class to retrieve data for rendering both classical and quantum bodies in the simulation.
  */
 class Renderer {
+
+    struct ShaderUniforms {
+        unsigned int transform;
+        unsigned int projection;
+        unsigned int cameraPos;
+    };
+
     public:
 
         /// @brief Constructs a Renderer with a reference to the Simulation instance.
@@ -59,7 +66,7 @@ class Renderer {
         static void onCursorMove(GLFWwindow* window, double xpos, double ypos);
         void handleCursorMove(double xpos, double ypos);
         
-        void updateCamera(unsigned int projectionLoc, unsigned int transformLoc);
+        void updateCamera(ShaderUniforms uniforms);
         /// @}
             
         /// @name Shader utility methods
@@ -92,5 +99,5 @@ class Renderer {
 
         std::map<std::string, unsigned int> shaderPrograms;     ///< Map to store shader program IDs with string keys for easy access when rendering different types of bodies (classical vs quantum)
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
-        std::map<std::string, std::pair<unsigned int, unsigned int>> cameraLoc;         ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
+        std::map<std::string, ShaderUniforms> cameraLoc;         ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
 };
