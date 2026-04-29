@@ -1,3 +1,9 @@
+## [0.2.0] - 2026-04-29
+## Added
+- Added python bindings for classical bodies simulation
+### Changed
+- Refactored code into python binding friendly format
+
 ## [0.1.1] - 2026-04-29
 ### Changed
 - Refactored code into python binding friendly format
