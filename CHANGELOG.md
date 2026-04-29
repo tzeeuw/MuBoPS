@@ -1,6 +1,7 @@
 ## [0.2.0] - 2026-04-29
 ## Added
 - Added python bindings for classical bodies simulation
+- Added documentation to header files using Doxygen
 ### Changed
 - Refactored code into python binding friendly format
 
