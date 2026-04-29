@@ -1,16 +1,10 @@
+/*
+* This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
+*/
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include <string>
-#include <ClassicalBody.hh>
-#include <QuantumBody.hh>
 #include <Simulation.hh>
-#include <memory>
-#include <random>
-#include <algorithm>
 #include <map>
 #include <glm/gtc/type_ptr.hpp>
 

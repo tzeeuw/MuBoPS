@@ -1,7 +1,14 @@
+/*
+* This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
+*/
 #include <Renderer.hh>
 #include <Simulation.hh>
-
-
+#include <ClassicalBody.hh>
+#include <QuantumBody.hh>
+#include <random>
+#include <algorithm>
+#include <memory>
+#include <cmath>
 
 int main() {
     Simulation sim = Simulation();

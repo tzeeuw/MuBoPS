@@ -1,3 +1,6 @@
+/*
+* This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
+*/
 #include <pybind11/pybind11.h>
 #include <Simulation.hh>
 #include <QuantumBody.hh>

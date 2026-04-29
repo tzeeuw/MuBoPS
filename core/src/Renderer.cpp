@@ -1,5 +1,9 @@
+/*
+* This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
+*/
 #include <Renderer.hh>
-#include <string>
+#include <iostream>
+#include <fstream>
 
 
 void Renderer::onResize(GLFWwindow* window, int width, int height) {

@@ -1,3 +1,6 @@
+/*
+* This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
+*/
 #pragma once
 #include <Body.hh>
 #include <vector>
