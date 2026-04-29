@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(mubops VERSION 0.2.1)
 
 set(CMAKE_CXX_STANDARD 17)
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Shared GLFW and GLAD libraries for the entire project
 # GLFW and GLM

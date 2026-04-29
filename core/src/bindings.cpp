@@ -30,9 +30,12 @@ PYBIND11_MODULE(mubops_core, m) {
             body.setAcceleration(glm::dvec3(x,y,z));
         });
 
+    py::class_<QuantumBody, Body, std::shared_ptr<QuantumBody>>(m, "QuantumBody")
+        .def(py::init<int, int, int>());
+
     py::class_<Simulation>(m, "Simulation")
         .def(py::init<>())
-        .def("addBody", [](Simulation& sim, std::shared_ptr<ClassicalBody> body) {
+        .def("addBody", [](Simulation& sim, std::shared_ptr<Body> body) {
             sim.addBody(body);
         })
         .def("update", &Simulation::update);
