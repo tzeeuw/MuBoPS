@@ -30,11 +30,14 @@ class QuantumBody : public Body {
         double dx, dy, dz;
         bool timeDep;
         bool calcProb = false;
-        double a0 = 0.2;
+        double a0 = 0.18;
         int Z=1;
 
-        glm::dvec3 h1 = glm::dvec3(0.0,0.0,0.5);
-        glm::dvec3 h2 = glm::dvec3(0.0,0.0,-0.5);
+        float d = 0.5 / std::sqrt(3);
+        glm::dvec3 h1 = glm::dvec3(d,d,d);
+        glm::dvec3 h2 = glm::dvec3(d,-d,-d);
+        glm::dvec3 h3 = glm::dvec3(-d,d,-d);
+        glm::dvec3 h4 = glm::dvec3(-d,-d,d);
         glm::dvec3 origin = glm::dvec3(0.0,0.0,0.0);
         
         std::vector<glm::dvec3> grid;

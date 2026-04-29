@@ -17,8 +17,12 @@ void main()
     vec4 color;
     float normalizedProb = vValue;
 
-    color = vec4(0.0f, 1.0f, 0.0, normalizedProb);
-
+    if (vValue > 0){
+        color = vec4(0.0f, 1.0f, 0.0f, normalizedProb);
+    }
+    else {
+        color = vec4(0.0f, 1.0f, 0.0f, 0.0f);
+    }
     FragColor = color;
 
 }

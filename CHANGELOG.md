@@ -1,3 +1,9 @@
+## [0.1.1] - 2026-04-29
+### Changed
+- Refactored code into python binding friendly format
+- Added test python bindings and C++ package can now be imported into python
+
+
 ## [0.1.0] - 2026-04-22
 ### Added
 - Quantum wavefunction visualization of the H2+ molecule based on the Schrodinger equation

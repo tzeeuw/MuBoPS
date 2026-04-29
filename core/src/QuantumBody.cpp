@@ -48,11 +48,15 @@ void QuantumBody::initializeWavefunction(){
                 glm::dvec3 pos = grid[index];
                 double distance1 = glm::length(pos - h1);
                 double distance2 = glm::length(pos - h2);
+                double distance3 = glm::length(pos - h3);
+                double distance4 = glm::length(pos - h4);
 
                 double psi1 = 1 / std::sqrt(M_PI) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance1/a0);
                 double psi2 = 1 / std::sqrt(M_PI) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance2/a0);
+                double psi3 = 1 / std::sqrt(M_PI) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance3/a0);
+                double psi4 = 1 / std::sqrt(M_PI) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance4/a0);
 
-                psi[index] = {psi1 - psi2, 0};
+                psi[index] = {psi1 + psi2 - psi3 - psi4, 0};
             }
         }
     }

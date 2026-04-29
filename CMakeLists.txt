@@ -11,6 +11,13 @@ FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TA
 FetchContent_MakeAvailable(glfw)
 FetchContent_Declare(glm GIT_REPOSITORY https://github.com/g-truc/glm.git)
 FetchContent_MakeAvailable(glm)
+FetchContent_Declare(pybind11 GIT_REPOSITORY https://github.com/pybind/pybind11.git GIT_TAG stable)
+FetchContent_MakeAvailable(pybind11)
+
+
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
+
+message(STATUS "Using Python: ${Python_EXECUTABLE}")
 
 # glad
 add_library(glad external/glad/glad.c)
