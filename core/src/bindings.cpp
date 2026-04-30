@@ -5,6 +5,7 @@
 #include <pybind11/stl.h>
 #include <Simulation.hh>
 #include <Body.hh>
+#include <Units.hh>
 #include <QuantumBody.hh>
 #include <Renderer.hh>
 #include <ClassicalBody.hh>
@@ -34,7 +35,7 @@ PYBIND11_MODULE(mubops_core, m) {
         .def(py::init<int, int, int>());
 
     py::class_<Simulation>(m, "Simulation")
-        .def(py::init<>())
+        .def(py::init<Units&>())
         .def("addBody", [](Simulation& sim, std::shared_ptr<Body> body) {
             sim.addBody(body);
         })
@@ -47,4 +48,13 @@ PYBIND11_MODULE(mubops_core, m) {
         .def("setupCamera", &Renderer::setupCamera)
         .def("setupShaders", &Renderer::setupShaders)
         .def("startRenderLoop", &Renderer::startRenderLoop);
+
+    py::class_<Units>(m, "Units")
+        .def(py::init<>())
+        .def("setScale", &Units::setScale)
+        .def_readwrite("G", &Units::G)
+        .def_readwrite("lengthScale", &Units::lengthScale)
+        .def_readwrite("massScale", &Units::massScale)
+        .def_readwrite("timeScale", &Units::timeScale)
+        .def_readwrite("a0", &Units::a0);
 }

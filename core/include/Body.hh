@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
+#include <Units.hh>
 
 
 /**
@@ -65,14 +66,14 @@ class Body {
          * @brief Advances the body's state by one timestep.
          * @param dt Timestep in seconds
          */
-        virtual void update(double dt) = 0;
+        virtual void update(double dt, Units& units) = 0;
 
         /**
          * @brief Returns render data for this body.
          * @return Vector of vec4 where xyz = position and w = normalized intensity
          *         (speed for classical bodies, probability density for quantum bodies)
          */
-        virtual std::vector<glm::vec4> getRenderData(const glm::dvec3& cameraPos) = 0;
+        virtual std::vector<glm::vec4> getRenderData(const glm::dvec3& cameraPos, Units& units) = 0;
 
     private:
         std::string name;           ///< Human-readable identifier

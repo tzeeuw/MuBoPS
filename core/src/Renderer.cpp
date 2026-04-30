@@ -343,16 +343,17 @@ void Renderer::updateCamera(ShaderUniforms uniforms){
 
 int Renderer::startRenderLoop() {
     
-    // enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    
     // enable point size based on distance
     glEnable(GL_PROGRAM_POINT_SIZE);
-
+    
     // enable depth of points
     glEnable(GL_DEPTH_TEST);
 
+    // enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
     while (!glfwWindowShouldClose(window)) {
         
         // calculate speed of frame rendering for consistent camera movement
@@ -389,11 +390,16 @@ int Renderer::startRenderLoop() {
         std::vector<glm::vec4> quantumRenderData = simulation.getQuantumRenderData(cameraPos);
         int pointsQuantum = static_cast<int>(quantumRenderData.size());
         
+        // make sure that alpha actually works by disabling depth
+        glDepthMask(GL_FALSE);
         glUseProgram(shaderPrograms["quantum"]);
         updateCamera(cameraLoc["quantum"]);
         
         glBufferData(GL_ARRAY_BUFFER, quantumRenderData.size() * sizeof(glm::vec4), quantumRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsQuantum);
+        
+        // enable it after rendering the quantum points
+        glDepthMask(GL_TRUE);
         
         glfwSwapBuffers(window);
         glfwPollEvents();

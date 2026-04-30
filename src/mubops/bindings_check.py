@@ -3,11 +3,13 @@ import random
 import math
 import numpy as np
 
-    
-sim = mc.Simulation()
 
-minR = 0.1
-maxR = 0.8
+units = mc.Units()
+units.setScale("Stellar")
+sim = mc.Simulation(units)
+
+minR = 0.04
+maxR = 0.1
 for i in range(5000):
     body = mc.ClassicalBody()
     angle = random.uniform(0, 2 * 3.14159)
@@ -15,8 +17,8 @@ for i in range(5000):
     radius = math.sqrt(minR**2 + random.uniform(0, 1) * (maxR**2 - minR**2))
     x = radius * math.cos(angle) 
     y = radius * math.sin(angle)
-    z = random.uniform(-0.8, 0.8)
-    body.setPosition(x, y, 0.3)
+    z = random.uniform(-0, 0.5)
+    body.setPosition(x, y, z)
 
     # phi_tangent = random.uniform(0, 2*3.14159)
     # r_norm = radius/np.linalg.norm([x, y, z])
@@ -32,8 +34,8 @@ for i in range(5000):
     # tangent_dir = math.cos(phi_tangent) * t1 + math.sin(phi_tangent) * t2
     # tangent_dir = tangent_dir/np.linalg.norm(tangent_dir)
 
-    vel_size = math.sqrt(6.67430e-11 * 5.972e8 / radius) / radius
-    body.setVelocity(-y * vel_size, x * vel_size, 0)
+    vel_size = math.sqrt(units.G * 1.989e30 / units.massScale / radius) / radius
+    body.setVelocity(0, 0, z * vel_size*0.2)
     body.setAcceleration(0.0, 0.0, 0.0)
     sim.addBody(body)
 # body = mc.QuantumBody(50,50,50)

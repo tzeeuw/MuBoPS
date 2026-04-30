@@ -4,6 +4,7 @@
 #include <QuantumBody.hh>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 double pi = 3.14159265358979323846;
 
@@ -31,11 +32,14 @@ std::vector<double> QuantumBody::getProbability(){
 };
 
 
-void QuantumBody::createGrid(){
+void QuantumBody::createGrid(Units& units){
     // start in corner
-    double x = -0.8;
-    double y = -0.8;
-    double z = -0.8;
+    double x = -2.0;
+    double y = -2.0;
+    double z = -2.0;
+    double dx = 2*std::abs(x)/Nx;
+    double dy = 2*std::abs(y)/Ny;
+    double dz = 2*std::abs(z)/Nz;
 
     // create grid of positions for the wavefunction
     for (int i = 0; i<Nx; i++) {
@@ -48,7 +52,7 @@ void QuantumBody::createGrid(){
 };
 
 
-void QuantumBody::initializeWavefunction(){
+void QuantumBody::initializeWavefunction(Units& units){
 
     // for each point in the grid, calculate the wavefunction value based on the 1S orbital of the hydrogen atom
     for (int i = 0; i<Nx; i++) {
@@ -56,25 +60,38 @@ void QuantumBody::initializeWavefunction(){
             for (int k = 0; k<Nz; k++) {
                 int index = i*Ny*Nz + j*Nz + k;
                 glm::dvec3 pos = grid[index];
+
+                double d = 0.5 / std::sqrt(3);
+                glm::dvec3 h1 = glm::dvec3(d, d, d);
+                glm::dvec3 h2 = glm::dvec3(d,-d,-d);            
+                glm::dvec3 h3 = glm::dvec3(-d,d,-d);
+                glm::dvec3 h4 = glm::dvec3(-d,-d,d);
+
                 double distance1 = glm::length(pos - h1);
                 double distance2 = glm::length(pos - h2);
                 double distance3 = glm::length(pos - h3);
                 double distance4 = glm::length(pos - h4);
 
                 // for now 4 hydrogen 1S orbitals
-                double psi1 = 1 / std::sqrt(pi) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance1/a0);
-                double psi2 = 1 / std::sqrt(pi) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance2/a0);
-                double psi3 = 1 / std::sqrt(pi) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance3/a0);
-                double psi4 = 1 / std::sqrt(pi) * std::pow(Z/a0, 3.0/2.0) * std::exp(-Z*distance4/a0);
+                double psi1 = 1 / std::sqrt(pi) * std::pow(Z/units.a0, 3.0/2.0) * std::exp(-Z*distance1/units.a0);
+                double psi2 = 1 / std::sqrt(pi) * std::pow(Z/units.a0, 3.0/2.0) * std::exp(-Z*distance2/units.a0);
+                double psi3 = 1 / std::sqrt(pi) * std::pow(Z/units.a0, 3.0/2.0) * std::exp(-Z*distance3/units.a0);
+                double psi4 = 1 / std::sqrt(pi) * std::pow(Z/units.a0, 3.0/2.0) * std::exp(-Z*distance4/units.a0);
 
-                psi[index] = {psi1 + psi2 - psi3 - psi4, 0};
+                psi[index] = {psi1 - psi2, psi3 - psi4};
             }
         }
     }
+    initialized = true;
 }
 
 
-void QuantumBody::update(double dt) {
+void QuantumBody::update(double dt, Units& units) {
+
+    if (!initialized){
+        createGrid(units);
+        initializeWavefunction(units);
+    }
 
     // no update for time-independent simulation
     if (!timeDep){
@@ -84,7 +101,7 @@ void QuantumBody::update(double dt) {
 }
 
 
-std::vector<glm::vec4> QuantumBody::getRenderData(const glm::dvec3& cameraPos) {
+std::vector<glm::vec4> QuantumBody::getRenderData(const glm::dvec3& cameraPos, Units& units) {
 
     // create render data based on probability density
     std::vector<glm::vec4> renderData(Nx*Ny*Nz);
@@ -95,7 +112,7 @@ std::vector<glm::vec4> QuantumBody::getRenderData(const glm::dvec3& cameraPos) {
         for (int j = 0; j<Ny; j++) {
             for (int k = 0; k<Nz; k++) {
                 int index = i*Ny*Nz + j*Nz + k;
-                renderData[index] = glm::vec4(static_cast<glm::vec3>(grid[index] - cameraPos), prob[index]);
+                renderData[index] = glm::vec4(static_cast<glm::vec3>((grid[index] - cameraPos)), prob[index]);
             }
         }
     }

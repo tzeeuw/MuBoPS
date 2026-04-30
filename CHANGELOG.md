@@ -1,4 +1,10 @@
-## [0.3.0]
+## [Unreleased]
+## Changed
+- rendering is now based on floating origin for higher precision calculations
+- adding units scaling, bodies scale based on selected unit scale
+
+
+## [0.3.0] 2026-04-30
 ### Added
 - Added camera movement based on free camera
     - Camera can now be moved with WASD for xy movement

@@ -12,6 +12,7 @@
 
 #pragma once
 #include <Body.hh>
+#include <Units.hh>
 #include <vector>
 
 /**
@@ -32,7 +33,7 @@ class ClassicalBody : public Body {
 
         /// @brief Advances the body's state by one timestep using Newtonian mechanics.
         /// @param dt Timestep in seconds
-        void update(double dt) override;
+        void update(double dt, Units& units) override;
 
         /// @brief Returns the current trail of positions for this body.
         /// @return Vector of vec3 representing the trail of positions
@@ -44,7 +45,7 @@ class ClassicalBody : public Body {
         
         /// @brief Returns render data for this body, including its current position and trail points.
         /// @return Vector of vec4 where xyz = position and w = normalized intensity (speed)
-        std::vector<glm::vec4>  getRenderData(const glm::dvec3& cameraPos) override;
+        std::vector<glm::vec4>  getRenderData(const glm::dvec3& cameraPos, Units& units) override;
 
     private:
         int trailIndex = 0;                 ///< Index for the next trail point to overwrite

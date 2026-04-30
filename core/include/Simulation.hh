@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <Units.hh>
 
 
 /**
@@ -22,7 +23,7 @@
  */
 class Simulation {
     public:
-        Simulation() {};
+        Simulation(Units& units): units(units) {};
         ~Simulation() {};
 
         /// @name Body management
@@ -49,7 +50,9 @@ class Simulation {
         std::vector<glm::vec4> getQuantumRenderData(const glm::dvec3& cameraPos);
         std::vector<glm::vec3> getTrails();
         /// @}
-
+        
+        
     private:
+        Units& units;
         std::vector<std::shared_ptr<Body>> bodies;      ///< Collection of all bodies in the simulation
     };

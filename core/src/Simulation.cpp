@@ -23,7 +23,7 @@ void Simulation::update(double dt) {
 
     // update each body in the simulation by calling its update method
     for (auto& body: bodies) {
-        body->update(dt);
+        body->update(dt, units);
     }
 }
 
@@ -49,7 +49,7 @@ std::vector<glm::vec4> Simulation::getQuantumRenderData(const glm::dvec3& camera
     for (auto& body: bodies) {
         QuantumBody* quantumBody = dynamic_cast<QuantumBody*>(body.get());
         if (quantumBody){
-            std::vector<glm::vec4> bodyData = body->getRenderData(cameraPos);
+            std::vector<glm::vec4> bodyData = body->getRenderData(cameraPos, units);
             renderData.insert(renderData.end(), bodyData.begin(), bodyData.end());
         }
     }
@@ -62,6 +62,7 @@ std::vector<glm::vec4> Simulation::getQuantumRenderData(const glm::dvec3& camera
         minVal = std::min(minVal, dataPoint[3]);
         maxVal = std::max(maxVal, dataPoint[3]);
     }
+
 
     // normalize the 4th data point to be between 0 and 1 for rendering
     for (auto& dataPoint : renderData) {
@@ -79,7 +80,7 @@ std::vector<glm::vec4> Simulation::getClassicalRenderData(const glm::dvec3& came
     for (auto& body: bodies) {
         ClassicalBody* classicalBody = dynamic_cast<ClassicalBody*>(body.get());
         if (classicalBody){
-            std::vector<glm::vec4> bodyData = body->getRenderData(cameraPos);
+            std::vector<glm::vec4> bodyData = body->getRenderData(cameraPos, units);
             renderData.insert(renderData.end(), bodyData.begin(), bodyData.end());
         }
     }
