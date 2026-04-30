@@ -239,9 +239,13 @@ void Renderer::setupCamera(){
     cameraLoc["classical"].transform = glGetUniformLocation(shaderPrograms["classical"], "transform");
     cameraLoc["classical"].projection = glGetUniformLocation(shaderPrograms["classical"], "projection");
     cameraLoc["classical"].cameraPos = glGetUniformLocation(shaderPrograms["classical"], "cameraPos");
+    cameraLoc["classical"].model = glGetUniformLocation(shaderPrograms["classical"], "model");
+    cameraLoc["classical"].view = glGetUniformLocation(shaderPrograms["classical"], "view");
     cameraLoc["quantum"].transform = glGetUniformLocation(shaderPrograms["quantum"], "transform");
     cameraLoc["quantum"].projection = glGetUniformLocation(shaderPrograms["quantum"], "projection");
     cameraLoc["quantum"].cameraPos = glGetUniformLocation(shaderPrograms["quantum"], "cameraPos");
+    cameraLoc["quantum"].model = glGetUniformLocation(shaderPrograms["quantum"], "model");
+    cameraLoc["quantum"].view = glGetUniformLocation(shaderPrograms["quantum"], "view");
 }
 
 void Renderer::updateCamera(ShaderUniforms uniforms){
@@ -250,6 +254,8 @@ void Renderer::updateCamera(ShaderUniforms uniforms){
     glUniformMatrix4fv(uniforms.projection, 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(uniforms.transform, 1, GL_FALSE, glm::value_ptr(trans));
     glUniform3fv(uniforms.cameraPos, 1, glm::value_ptr(cameraPos));
+    glUniformMatrix4fv(uniforms.model, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(uniforms.view, 1, GL_FALSE, glm::value_ptr(view));
 }
 
 
@@ -263,12 +269,15 @@ int Renderer::startRenderLoop() {
     // enable point size based on distance
     glEnable(GL_PROGRAM_POINT_SIZE);
 
+    // enable depth of points
+    glEnable(GL_DEPTH_TEST);
+
     while (!glfwWindowShouldClose(window)) {
         
         processInput(window);
         // background color
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT); 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
         // update the simulation for a few steps before rendering the next frame to ensure smooth animation
         for (int i = 0; i < 10; i++){
@@ -276,7 +285,7 @@ int Renderer::startRenderLoop() {
         }
         
         // update the camera projection and view matrices based on the current camera position and orientation
-        projection = glm::perspective(glm::radians(fov), SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
         trans = glm::lookAt(cameraPos, glm::vec3(0.0f), cameraUp);
         
         // first render the classical data
