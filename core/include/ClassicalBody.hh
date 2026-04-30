@@ -44,7 +44,7 @@ class ClassicalBody : public Body {
         
         /// @brief Returns render data for this body, including its current position and trail points.
         /// @return Vector of vec4 where xyz = position and w = normalized intensity (speed)
-        std::vector<glm::vec4>  getRenderData() override;
+        std::vector<glm::vec4>  getRenderData(const glm::dvec3& cameraPos) override;
 
     private:
         int trailIndex = 0;                 ///< Index for the next trail point to overwrite

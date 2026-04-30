@@ -84,7 +84,7 @@ void QuantumBody::update(double dt) {
 }
 
 
-std::vector<glm::vec4> QuantumBody::getRenderData() {
+std::vector<glm::vec4> QuantumBody::getRenderData(const glm::dvec3& cameraPos) {
 
     // create render data based on probability density
     std::vector<glm::vec4> renderData(Nx*Ny*Nz);
@@ -95,7 +95,7 @@ std::vector<glm::vec4> QuantumBody::getRenderData() {
         for (int j = 0; j<Ny; j++) {
             for (int k = 0; k<Nz; k++) {
                 int index = i*Ny*Nz + j*Nz + k;
-                renderData[index] = glm::vec4(static_cast<glm::vec3>(grid[index]), prob[index]);
+                renderData[index] = glm::vec4(static_cast<glm::vec3>(grid[index] - cameraPos), prob[index]);
             }
         }
     }

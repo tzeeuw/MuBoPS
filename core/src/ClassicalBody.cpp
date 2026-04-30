@@ -39,11 +39,11 @@ void ClassicalBody::addTrailPoint(const glm::dvec3& position) {
 }
 
 
-std::vector<glm::vec4> ClassicalBody::getRenderData() {
+std::vector<glm::vec4> ClassicalBody::getRenderData(const glm::dvec3& cameraPos) {
 
     // get position and speed for rendering
-    glm::vec3 position = static_cast<glm::vec3>(getPosition());
+    glm::vec3 relativePosition = static_cast<glm::vec3>(getPosition() - cameraPos);
     float speed = getSpeed();
 
-    return {glm::vec4(position, speed)};
+    return {glm::vec4(relativePosition, speed)};
 }

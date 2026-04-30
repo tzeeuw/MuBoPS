@@ -72,7 +72,7 @@ class Body {
          * @return Vector of vec4 where xyz = position and w = normalized intensity
          *         (speed for classical bodies, probability density for quantum bodies)
          */
-        virtual std::vector<glm::vec4> getRenderData() = 0;
+        virtual std::vector<glm::vec4> getRenderData(const glm::dvec3& cameraPos) = 0;
 
     private:
         std::string name;           ///< Human-readable identifier

@@ -40,7 +40,7 @@ void Simulation::addTrailPoints() {
 
 
 
-std::vector<glm::vec4> Simulation::getQuantumRenderData() {
+std::vector<glm::vec4> Simulation::getQuantumRenderData(const glm::dvec3& cameraPos) {
 
     // retrieve the render data for quantum bodies, which includes position and normalized probability density for rendering
     std::vector<glm::vec4> renderData;
@@ -49,7 +49,7 @@ std::vector<glm::vec4> Simulation::getQuantumRenderData() {
     for (auto& body: bodies) {
         QuantumBody* quantumBody = dynamic_cast<QuantumBody*>(body.get());
         if (quantumBody){
-            std::vector<glm::vec4> bodyData = body->getRenderData();
+            std::vector<glm::vec4> bodyData = body->getRenderData(cameraPos);
             renderData.insert(renderData.end(), bodyData.begin(), bodyData.end());
         }
     }
@@ -70,7 +70,7 @@ std::vector<glm::vec4> Simulation::getQuantumRenderData() {
     return renderData;
 }
 
-std::vector<glm::vec4> Simulation::getClassicalRenderData() {
+std::vector<glm::vec4> Simulation::getClassicalRenderData(const glm::dvec3& cameraPos) {
 
     // retrieve the render data for classical bodies, which includes position and normalized speed for rendering
     std::vector<glm::vec4> renderData;
@@ -79,7 +79,7 @@ std::vector<glm::vec4> Simulation::getClassicalRenderData() {
     for (auto& body: bodies) {
         ClassicalBody* classicalBody = dynamic_cast<ClassicalBody*>(body.get());
         if (classicalBody){
-            std::vector<glm::vec4> bodyData = body->getRenderData();
+            std::vector<glm::vec4> bodyData = body->getRenderData(cameraPos);
             renderData.insert(renderData.end(), bodyData.begin(), bodyData.end());
         }
     }

@@ -45,8 +45,8 @@ class Simulation {
 
         /// @name Data retrieval for rendering
         /// @{
-        std::vector<glm::vec4> getClassicalRenderData();
-        std::vector<glm::vec4> getQuantumRenderData();
+        std::vector<glm::vec4> getClassicalRenderData(const glm::dvec3& cameraPos);
+        std::vector<glm::vec4> getQuantumRenderData(const glm::dvec3& cameraPos);
         std::vector<glm::vec3> getTrails();
         /// @}
 

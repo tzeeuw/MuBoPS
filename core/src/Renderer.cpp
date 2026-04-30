@@ -310,7 +310,7 @@ void Renderer::setupCamera(){
     cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
     cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    view = glm::lookAt(glm::vec3(0.0f), cameraFront, cameraUp);
     model = glm::mat4(1.0f);
     projection = glm::mat4(1.0f);
 
@@ -321,12 +321,10 @@ void Renderer::setupCamera(){
 
     // setup camera projection and view matrices
     cameraLoc["classical"].projection = glGetUniformLocation(shaderPrograms["classical"], "projection");
-    cameraLoc["classical"].cameraPos = glGetUniformLocation(shaderPrograms["classical"], "cameraPos");
     cameraLoc["classical"].model = glGetUniformLocation(shaderPrograms["classical"], "model");
     cameraLoc["classical"].view = glGetUniformLocation(shaderPrograms["classical"], "view");
     cameraLoc["classical"].fov = glGetUniformLocation(shaderPrograms["classical"], "fov");
     cameraLoc["quantum"].projection = glGetUniformLocation(shaderPrograms["quantum"], "projection");
-    cameraLoc["quantum"].cameraPos = glGetUniformLocation(shaderPrograms["quantum"], "cameraPos");
     cameraLoc["quantum"].model = glGetUniformLocation(shaderPrograms["quantum"], "model");
     cameraLoc["quantum"].view = glGetUniformLocation(shaderPrograms["quantum"], "view");
     cameraLoc["quantum"].fov = glGetUniformLocation(shaderPrograms["quantum"], "fov");
@@ -336,7 +334,6 @@ void Renderer::updateCamera(ShaderUniforms uniforms){
 
     // update the camera projection and view matrices in the shader
     glUniformMatrix4fv(uniforms.projection, 1, GL_FALSE, glm::value_ptr(projection));
-    glUniform3fv(uniforms.cameraPos, 1, glm::value_ptr(cameraPos));
     glUniformMatrix4fv(uniforms.model, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(uniforms.view, 1, GL_FALSE, glm::value_ptr(view));
     glUniform1f(uniforms.fov, FOV);
@@ -375,10 +372,10 @@ int Renderer::startRenderLoop() {
         
         // update the camera projection and view matrices based on the current camera position and orientation
         projection = glm::perspective(glm::radians(FOV), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = glm::lookAt(glm::vec3(0.0f), cameraFront, cameraUp);
         
         // first render the classical data
-        std::vector<glm::vec4> classicalRenderData = simulation.getClassicalRenderData();
+        std::vector<glm::vec4> classicalRenderData = simulation.getClassicalRenderData(cameraPos);
         int pointsClassical = static_cast<int>(classicalRenderData.size());
         
         glUseProgram(shaderPrograms["classical"]);
@@ -389,7 +386,7 @@ int Renderer::startRenderLoop() {
         
         
         // now render the quantum data
-        std::vector<glm::vec4> quantumRenderData = simulation.getQuantumRenderData();
+        std::vector<glm::vec4> quantumRenderData = simulation.getQuantumRenderData(cameraPos);
         int pointsQuantum = static_cast<int>(quantumRenderData.size());
         
         glUseProgram(shaderPrograms["quantum"]);

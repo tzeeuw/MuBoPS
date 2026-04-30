@@ -57,7 +57,7 @@ class QuantumBody : public Body {
 
         /// @brief Returns render data for this body based on the probability density.
         /// @return Vector of vec4 where xyz = position and w = normalized intensity (probability density)
-        std::vector<glm::vec4> getRenderData() override;
+        std::vector<glm::vec4> getRenderData(const glm::dvec3& cameraPos) override;
 
         /// @brief Calculates the probability density from the wavefunction values.
         void calculateProbability();

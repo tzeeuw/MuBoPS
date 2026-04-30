@@ -31,7 +31,6 @@ class Renderer {
         unsigned int model;
         unsigned int view;
         unsigned int projection;
-        unsigned int cameraPos;
         unsigned int fov;
     };
 
