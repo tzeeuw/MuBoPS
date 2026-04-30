@@ -1,7 +1,11 @@
-## [Unreleased]
+## [0.3.0]
 ### Added
 - Added camera movement based on free camera
-    - Camera can now be moved with WASD, space, left-ctrl and QE and the mouse when holding the left mouse button
+    - Camera can now be moved with WASD for xy movement
+    - Spacebar and left ctrl move in the z direction
+    - Q and E control the roll
+    - Mouse controlls yaw and pitch
+    - Middle mouse button can zoom in and out
 
 ### Changed
 - Changed camera definition to the proper model, view, projection
@@ -11,7 +15,7 @@
 - Fixed depth rendering of points
 
 
-## [0.2.1] - 2026-04-28
+## [0.2.1] - 2026-04-29
 ## Added
 - pointsize rendering based on camera distance
 
