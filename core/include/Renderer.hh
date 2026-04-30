@@ -28,9 +28,11 @@
 class Renderer {
 
     struct ShaderUniforms {
-        unsigned int transform;
+        unsigned int model;
+        unsigned int view;
         unsigned int projection;
         unsigned int cameraPos;
+        unsigned int fov;
     };
 
     public:
@@ -60,11 +62,14 @@ class Renderer {
         static void onResize(GLFWwindow* window, int width, int height);
         void handleResize(int width, int height);
         
-        static void onMouseClick(GLFWwindow* window, int i, int d, int k);
+        static void onMouseClick(GLFWwindow* window, int button, int action, int mods);
         void handleMouseClick(int button, int action, int mods);
         
         static void onCursorMove(GLFWwindow* window, double xpos, double ypos);
         void handleCursorMove(double xpos, double ypos);
+
+        static void onScroll(GLFWwindow* window, double xoffset, double yoffset);
+        void handleScroll(double xoffset, double yoffset);
         
         void updateCamera(ShaderUniforms uniforms);
         /// @}
@@ -78,26 +83,33 @@ class Renderer {
     private:
         Simulation& simulation;                                 ///< Reference to the Simulation instance being rendered
         GLFWwindow* window;                                     ///< Pointer to the GLFW window used for rendering
-
-        glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);      ///< Initial position of the camera in world space
-        float cameraDistance = glm::length(cameraPos);          ///< Distance of the camera from the origin, used for calculating camera movement based on mouse input
-        glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);   ///< Initial direction the camera is facing, used for calculating the view matrix
-        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);       ///< Up vector for the camera, used for calculating the view matrix and ensuring correct orientation of the camera in world space
-        
-        bool mousePressed = false;                              ///< Flag to track whether the left mouse button is currently pressed, used for enabling camera rotation based on mouse movement
-        bool notPressed = true;                                 ///< Flag to track the initial state of mouse press, used to prevent sudden jumps in camera orientation when the mouse is first pressed
-        float lastX = 400.0f;                                   ///< Initial last X position of the mouse, set to the center of the window for calculating mouse movement offsets
-        float lastY = 400.0f;                                   ///< Initial last Y position of the mouse, set to the center of the window for calculating mouse movement offsets
-        float pitch = 0.0f;                                     ///< Initial pitch angle of the camera, used for calculating the camera's front vector based on mouse movement
-        float yaw = 90.0f;                                      ///< Initial yaw angle of the camera, set to 90 degrees to face towards the negative Z direction, used for calculating the camera's front vector based on mouse movement
+   
         float SCR_WIDTH;                                        ///< Width of the window in pixels, stored for use in projection matrix calculations and resizing
         float SCR_HEIGHT;                                       ///< Height of the window in pixels, stored for use in projection matrix calculations and resizing
-        float fov = 45.0;                                       ///< Field of view for the perspective projection, used in the projection matrix to control the zoom level of the camera
-
-        glm::mat4 trans = glm::mat4(1.0f);                      ///< Transformation matrix for the camera view, initialized to the identity matrix and updated based on camera position and orientation
-        glm::mat4 projection = glm::mat4(1.0f);                 ///< Projection matrix for the perspective projection, initialized to the identity matrix and updated based on field of view and aspect ratio
+        
+        bool mousePressed = false;                              ///< Flag to track whether the left mouse button is currently pressed, used for enabling camera rotation based on mouse movement
+        bool firstPress = true;                                 ///< Flag to track the initial state of mouse press, used to prevent sudden jumps in camera orientation when the mouse is first pressed
+        float lastX = 400.0f;                                   ///< Initial last X position of the mouse, set to the center of the window for calculating mouse movement offsets
+        float lastY = 400.0f;                                   ///< Initial last Y position of the mouse, set to the center of the window for calculating mouse movement offsets
+        
+        glm::vec3 cameraPos;                                    ///< Position of the camera in world space
+        glm::vec3 cameraFront;                                  ///< Front vector for the camera, used for calculating the view matrix
+        glm::vec3 cameraRight;                                  ///< right vector for the camera used for calculating the view matrix
+        glm::vec3 cameraUp;                                     ///< Up vector for the camera, used for calculating the view matrix and ensuring correct orientation of the camera in world space
+        
+        float FOV;                                              ///< Field of view for the perspective projection, used in the projection matrix to control the zoom level of the camera
+        float pitch = 0.0f;                                     ///< Initial pitch angle of the camera, used for calculating the camera's front vector based on mouse movement
+        float yaw = -90.0f;                                     ///< Initial yaw angle of the camera, set to 90 degrees to face towards the negative Z direction, used for calculating the camera's front vector based on mouse movement
+        float cameraSpeed;                                      ///< Speed of camera for keyboard input
+        float sensitivity;                                      ///< Speed of camera for mouse input
+        float deltaTime = 0.0f;     // keep track of frame generation speed
+        float lastFrame = 0.0f;
+        
+        glm::mat4 model;                                        ///< Model matrix for transforming local to world coordinates
+        glm::mat4 view;                                         ///< View matrix for transforming world coordinates to camera view
+        glm::mat4 projection;                                   ///< Projection matrix for the perspective projection
 
         std::map<std::string, unsigned int> shaderPrograms;     ///< Map to store shader program IDs with string keys for easy access when rendering different types of bodies (classical vs quantum)
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
-        std::map<std::string, ShaderUniforms> cameraLoc;         ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
+        std::map<std::string, ShaderUniforms> cameraLoc;        ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
 };

@@ -1,15 +1,29 @@
+## [Unreleased]
+### Added
+- Added camera movement based on free camera
+    - Camera can now be moved with WASD, space, left-ctrl and QE and the mouse when holding the left mouse button
+
+### Changed
+- Changed camera definition to the proper model, view, projection
+- Changed background to a dark midnight blue
+
+### Bug Fixes
+- Fixed depth rendering of points
+
+
 ## [0.2.1] - 2026-04-28
 ## Added
 - pointsize rendering based on camera distance
-
 
 
 ## [0.2.0] - 2026-04-29
 ## Added
 - Added python bindings for classical bodies simulation
 - Added documentation to header files using Doxygen
+
 ### Changed
 - Refactored code into python binding friendly format
+
 
 ## [0.1.1] - 2026-04-29
 ### Changed
