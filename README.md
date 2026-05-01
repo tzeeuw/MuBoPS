@@ -1,4 +1,4 @@
-# Multi-Body Physics Simulaation tool (MuBoPS) Version (0.3.0)
+# Multi-Body Physics Simulaation tool (MuBoPS) Version (0.3.1)
 Multi-Body Physics Simulation tool (MuBoPS) is a project aimed to simulated Multi-Body physics across many branches in physics.
 The goal is to simulate systems from small scale (particle physics) to large scale (accretion disks or black hole mergers), based on a centralized system.
 

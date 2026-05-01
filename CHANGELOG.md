@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.3.1] 2026-05-01
 ## Changed
 - rendering is now based on floating origin for higher precision calculations
 - adding units scaling, bodies scale based on selected unit scale
