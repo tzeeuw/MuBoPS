@@ -2,6 +2,8 @@
 ## Changed
 - rendering is now based on floating origin for higher precision calculations
 - adding units scaling, bodies scale based on selected unit scale
+### Removed
+- removed trail points from classical bodies
 
 
 ## [0.3.0] 2026-04-30

@@ -30,13 +30,6 @@ void ClassicalBody::update(double dt, Units& units) {
 }
 
 
-void ClassicalBody::addTrailPoint(const glm::dvec3& position) {
-
-    // add trail points based on circular map
-    trail[trailIndex] = (static_cast<glm::vec3>(position));
-    trailIndex = (trailIndex + 1) % (trailPoints);
-}
-
 
 std::vector<glm::vec4> ClassicalBody::getRenderData(const glm::dvec3& cameraPos, Units& units) {
 

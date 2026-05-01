@@ -27,18 +27,6 @@ void Simulation::update(double dt) {
     }
 }
 
-void Simulation::addTrailPoints() {
-
-    // add trailpoints to classical bodies
-    for (auto& body: bodies) {
-        ClassicalBody* classicalBody = dynamic_cast<ClassicalBody*>(body.get());
-        if (classicalBody) {
-            classicalBody->addTrailPoint(classicalBody->getPosition());
-        }
-    }
-}
-
-
 
 std::vector<glm::vec4> Simulation::getQuantumRenderData(const glm::dvec3& cameraPos) {
 
@@ -99,21 +87,4 @@ std::vector<glm::vec4> Simulation::getClassicalRenderData(const glm::dvec3& came
         dataPoint[3] = (dataPoint[3] - minVal) / (maxVal - minVal);
     }
     return renderData;
-}
-
-
-// (DEPRICATED)
-std::vector<glm::vec3> Simulation::getTrails() {
-
-    // get all trail points from classical bodies and combine them into a single vector for rendering
-    std::vector<glm::vec3> trails;
-    for (auto& body: bodies) {
-        ClassicalBody* classicalBody = dynamic_cast<ClassicalBody*>(body.get());
-
-        if (classicalBody) {
-            const std::vector<glm::vec3>& trail = classicalBody->getTrail();
-            trails.insert(trails.end(), trail.begin(), trail.end());
-        }
-    }
-    return trails;
 }

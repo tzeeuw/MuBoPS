@@ -25,30 +25,16 @@
  */
 class ClassicalBody : public Body {
     public:
-        ClassicalBody(int trailPoints = 10) : trailPoints(trailPoints) {
-            trail.resize(trailPoints);
-        }
-
+        ClassicalBody(){};
         ~ClassicalBody() {return;};
 
         /// @brief Advances the body's state by one timestep using Newtonian mechanics.
         /// @param dt Timestep in seconds
         void update(double dt, Units& units) override;
-
-        /// @brief Returns the current trail of positions for this body.
-        /// @return Vector of vec3 representing the trail of positions
-        const std::vector<glm::vec3>& getTrail() const {return this->trail;}
-        
-        /// @brief  Adds a new position to the trail, maintaining a fixed number of points.
-        /// @param position The new position to add to the trail
-        void addTrailPoint(const glm::dvec3& position);
         
         /// @brief Returns render data for this body, including its current position and trail points.
         /// @return Vector of vec4 where xyz = position and w = normalized intensity (speed)
         std::vector<glm::vec4>  getRenderData(const glm::dvec3& cameraPos, Units& units) override;
 
     private:
-        int trailIndex = 0;                 ///< Index for the next trail point to overwrite
-        int trailPoints;                    ///< Maximum number of points to keep in the trail
-        std::vector<glm::vec3> trail;       ///< Circular buffer storing the recent positions of the body for rendering trails
 };
