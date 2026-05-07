@@ -6,11 +6,12 @@ import numpy as np
 
 units = mc.Units()
 units.setScale("Stellar")
+
 sim = mc.Simulation(units)
 
 minR = 0.1
 maxR = 0.8
-for i in range(5000):
+for i in range(2000):
     body = mc.ClassicalBody()
     angle = random.uniform(0, 2 * 3.14159)
     phi = random.uniform(0, 3.14159)
@@ -19,6 +20,13 @@ for i in range(5000):
     y = radius * math.sin(angle)
     z = random.uniform(-0, 0.0)
     body.setPosition(x, y, 0)
+    if i == 0:
+        body.setMass(1.0)
+        body.setGravity(False, True)
+        body.setPosition(0, 0, 0)
+    else:
+        body.setMass(0.1)
+        body.setGravity(True, False)
 
     # phi_tangent = random.uniform(0, 2*3.14159)
     # r_norm = radius/np.linalg.norm([x, y, z])
@@ -34,7 +42,9 @@ for i in range(5000):
     # tangent_dir = math.cos(phi_tangent) * t1 + math.sin(phi_tangent) * t2
     # tangent_dir = tangent_dir/np.linalg.norm(tangent_dir)
 
-    vel_size = math.sqrt(units.G * 1.989e30 / units.massScale / radius) / radius*0.9
+    vel_size = math.sqrt(units.G * 1.989e30 / units.massScale / radius) / radius
+    if i == 0:
+        vel_size *= 0.0
     body.setVelocity(-y*vel_size, x*vel_size, 0)
     body.setAcceleration(0.0, 0.0, 0.0)
     sim.addBody(body)
@@ -42,7 +52,7 @@ for i in range(5000):
 # sim.addBody(body)
 
 renderer = mc.Renderer(sim)
-renderer.setupWindow(2560, 1440)
+renderer.setupWindow(1000, 1000)
 renderer.setupShaders()
 renderer.setupObjects()
 renderer.setupCamera()

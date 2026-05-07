@@ -29,7 +29,8 @@ PYBIND11_MODULE(mubops_core, m) {
         .def("setRadius", &ClassicalBody::setRadius)
         .def("setAcceleration", [](ClassicalBody& body, double x, double y, double z) {
             body.setAcceleration(glm::dvec3(x,y,z));
-        });
+        })
+        .def("setGravity", &ClassicalBody::setGravity);
 
     py::class_<QuantumBody, Body, std::shared_ptr<QuantumBody>>(m, "QuantumBody")
         .def(py::init<int, int, int>());

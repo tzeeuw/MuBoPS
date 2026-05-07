@@ -18,7 +18,7 @@ class Units {
             if (scale == "Stellar") {
                 lengthScale = 1.496e11; // AU
                 massScale = 1.989e30; // solar mass
-                timeScale = 30*24*60*60; // days
+                timeScale = 24*60*60; // days
             }
             if (scale == "Quantum") {
                 lengthScale = 3 * 5.291e-11; // 3*bohr radius

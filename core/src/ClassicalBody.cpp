@@ -12,11 +12,9 @@ void ClassicalBody::update(double dt, Units& units) {
     glm::dvec3 velocity = this->getVelocity();
     glm::dvec3 position = this->getPosition();
     glm::dvec3 acceleration = this->getAcceleration();
-    double G = units.G; // gravitational constant
-    double M = 1.989e30/units.massScale;
-
-    glm::dvec3 newAcceleration = -G * M * position / glm::length(position) / glm::length(position) / glm::length(position);
-    // std::cout << glm::length(position) << " " << G * M << glm::length(newAcceleration) << " a"<< std::endl;
+    glm::dvec3 newAcceleration = this->getNewAcceleration();
+    
+    // std::cout << units.G << " " << glm::length(position) << " " << glm::length(newAcceleration) << " a"<< std::endl;
 
     // use leapfrog integration to update velocity and position
     glm::dvec3 halfVelocity = velocity + 0.5 * acceleration * dt;

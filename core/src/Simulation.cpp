@@ -19,12 +19,50 @@ void Simulation::removeBody(std::shared_ptr<Body>& body) {
 }
 
 
+
 void Simulation::update(double dt) {
 
     // update each body in the simulation by calling its update method
+    updateGravity(dt);
     for (auto& body: bodies) {
         body->update(dt, units);
     }
+}
+
+void Simulation::updateGravity(double dt) {
+
+    for (auto& body1: bodies) {
+        ClassicalBody* cbody1 = dynamic_cast<ClassicalBody*>(body1.get());
+        if (!cbody1 || !cbody1->affectedByGravity){
+            continue;
+        }
+
+        glm::dvec3 newAcceleration(0.0);
+        glm::dvec3 position1 = cbody1->getPosition();
+
+        for (auto& body2: bodies) {
+            if (body1 == body2) {
+                continue;
+            }
+            ClassicalBody* cbody2 = dynamic_cast<ClassicalBody*>(body2.get());
+            if (!cbody2 || !cbody2->exertsGravity){
+                continue;
+            }
+
+            glm::dvec3 position2 = cbody2->getPosition();
+            glm::dvec3 dpos = position2 - position1;
+            double dist = glm::length(dpos);
+
+            if (dist == 0.0) {
+                continue;
+            }
+
+            newAcceleration += units.G * cbody2->getMass() * dpos / (dist * dist * dist);
+        }
+
+        cbody1->setNewAcceleration(newAcceleration);
+    }
+    return;
 }
 
 

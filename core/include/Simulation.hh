@@ -39,20 +39,20 @@ class Simulation {
         
         void removeBody(std::shared_ptr<Body>& body);
         /// @}
-
+        void initGravityPairs();
 
         void update(double dt);
-        void addTrailPoints();
+        void updateGravity(double dt);
 
         /// @name Data retrieval for rendering
         /// @{
         std::vector<glm::vec4> getClassicalRenderData(const glm::dvec3& cameraPos);
         std::vector<glm::vec4> getQuantumRenderData(const glm::dvec3& cameraPos);
-        std::vector<glm::vec3> getTrails();
         /// @}
         
         
     private:
         Units& units;
         std::vector<std::shared_ptr<Body>> bodies;      ///< Collection of all bodies in the simulation
+        std::vector<std::pair<std::shared_ptr<Body>, std::shared_ptr<Body>>> gravityPairs;
     };

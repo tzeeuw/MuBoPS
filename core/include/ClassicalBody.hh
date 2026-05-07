@@ -36,5 +36,13 @@ class ClassicalBody : public Body {
         /// @return Vector of vec4 where xyz = position and w = normalized intensity (speed)
         std::vector<glm::vec4>  getRenderData(const glm::dvec3& cameraPos, Units& units) override;
 
+        void setGravity(bool affectedByGravity, bool exertsGravity){
+            this->affectedByGravity = affectedByGravity;
+            this->exertsGravity = exertsGravity;
+        };
+        
+        bool exertsGravity = false;
+        bool affectedByGravity = false;
+
     private:
 };

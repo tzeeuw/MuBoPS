@@ -60,6 +60,9 @@ class Body {
 
         void setAcceleration(glm::dvec3 acceleration) { this->acceleration = acceleration; }
         const glm::dvec3& getAcceleration() { return this->acceleration; }
+
+        void setNewAcceleration(glm::dvec3 newAcceleration) {this->newAcceleration = newAcceleration; }
+        const glm::dvec3& getNewAcceleration() {return this->newAcceleration; }
         /// @}
 
         /**
@@ -82,4 +85,5 @@ class Body {
         glm::dvec3 position;        ///< Position in simulation units
         glm::dvec3 velocity;        ///< Velocity in simulation units per second
         glm::dvec3 acceleration;    ///< Acceleration in simulation units per second squared
+        glm::dvec3 newAcceleration;
 };
