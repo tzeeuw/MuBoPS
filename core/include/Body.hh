@@ -85,5 +85,5 @@ class Body {
         glm::dvec3 position;        ///< Position in simulation units
         glm::dvec3 velocity;        ///< Velocity in simulation units per second
         glm::dvec3 acceleration;    ///< Acceleration in simulation units per second squared
-        glm::dvec3 newAcceleration;
+        glm::dvec3 newAcceleration = {0.0,0.0,0.0};
 };

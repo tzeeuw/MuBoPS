@@ -18,6 +18,25 @@ void Simulation::removeBody(std::shared_ptr<Body>& body) {
     }
 }
 
+void Simulation::initGravityPairs() {
+    for (auto& body1: bodies) {
+        ClassicalBody* cbody1 = dynamic_cast<ClassicalBody*>(body1.get());
+        if (!cbody1 || !cbody1->affectedByGravity) {
+            continue;
+        }
+        for (auto& body2: bodies) {
+            if (body1 == body2) {
+                continue;
+            }
+            ClassicalBody* cbody2 = dynamic_cast<ClassicalBody*>(body2.get());
+            if (!cbody2 || !cbody2->exertsGravity){
+                continue;
+            }
+
+            gravityPairs.push_back(std::pair(body1, body2));
+        }
+    }
+}
 
 
 void Simulation::update(double dt) {
@@ -30,40 +49,61 @@ void Simulation::update(double dt) {
 }
 
 void Simulation::updateGravity(double dt) {
+    for (auto& bodyPair: gravityPairs) {
+        auto& cbody1 = bodyPair.first;
+        auto& cbody2 = bodyPair.second;
+        
+        glm::dvec3 newAcceleration = cbody1->getNewAcceleration();
+        glm::dvec3 pos1 = cbody1->getPosition();
+        glm::dvec3 pos2 = cbody2->getPosition();
 
-    for (auto& body1: bodies) {
-        ClassicalBody* cbody1 = dynamic_cast<ClassicalBody*>(body1.get());
-        if (!cbody1 || !cbody1->affectedByGravity){
+        glm::dvec3 dpos = pos2 - pos1;
+        double dist = glm::length(dpos);
+
+        if (dist == 0.0) {
             continue;
         }
 
-        glm::dvec3 newAcceleration(0.0);
-        glm::dvec3 position1 = cbody1->getPosition();
-
-        for (auto& body2: bodies) {
-            if (body1 == body2) {
-                continue;
-            }
-            ClassicalBody* cbody2 = dynamic_cast<ClassicalBody*>(body2.get());
-            if (!cbody2 || !cbody2->exertsGravity){
-                continue;
-            }
-
-            glm::dvec3 position2 = cbody2->getPosition();
-            glm::dvec3 dpos = position2 - position1;
-            double dist = glm::length(dpos);
-
-            if (dist == 0.0) {
-                continue;
-            }
-
-            newAcceleration += units.G * cbody2->getMass() * dpos / (dist * dist * dist);
-        }
-
+        newAcceleration += units.G * cbody2->getMass() * dpos / (dist * dist * dist);
         cbody1->setNewAcceleration(newAcceleration);
     }
-    return;
 }
+
+// void Simulation::updateGravity(double dt) {
+
+//     for (auto& body1: bodies) {
+//         ClassicalBody* cbody1 = dynamic_cast<ClassicalBody*>(body1.get());
+//         if (!cbody1 || !cbody1->affectedByGravity){
+//             continue;
+//         }
+
+//         glm::dvec3 newAcceleration(0.0);
+//         glm::dvec3 position1 = cbody1->getPosition();
+
+//         for (auto& body2: bodies) {
+//             if (body1 == body2) {
+//                 continue;
+//             }
+//             ClassicalBody* cbody2 = dynamic_cast<ClassicalBody*>(body2.get());
+//             if (!cbody2 || !cbody2->exertsGravity){
+//                 continue;
+//             }
+
+//             glm::dvec3 position2 = cbody2->getPosition();
+//             glm::dvec3 dpos = position2 - position1;
+//             double dist = glm::length(dpos);
+
+//             if (dist == 0.0) {
+//                 continue;
+//             }
+
+//             newAcceleration += units.G * cbody2->getMass() * dpos / (dist * dist * dist);
+//         }
+
+//         cbody1->setNewAcceleration(newAcceleration);
+//     }
+//     return;
+// }
 
 
 std::vector<glm::vec4> Simulation::getQuantumRenderData(const glm::dvec3& cameraPos) {

@@ -25,6 +25,7 @@ void ClassicalBody::update(double dt, Units& units) {
     this->setPosition(newPosition);
     this->setVelocity(newVelocity);
     this->setAcceleration(newAcceleration);
+    this->setNewAcceleration({0.0,0.0,0.0});
 }
 
 

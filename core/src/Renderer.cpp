@@ -353,8 +353,13 @@ int Renderer::startRenderLoop() {
     // enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    int step = 0;
+
+    simulation.initGravityPairs();
     
     while (!glfwWindowShouldClose(window)) {
+        step += 1;
         
         // calculate speed of frame rendering for consistent camera movement
         float currentFrame = glfwGetTime();
@@ -367,8 +372,12 @@ int Renderer::startRenderLoop() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
         // update the simulation for a few steps before rendering the next frame to ensure smooth animation
+        float now = glfwGetTime();
         for (int i = 0; i < 10; i++){
             simulation.update(0.001);
+        }
+        if (step % 10 == 0){
+            std::cout << glfwGetTime() - now  << "s" << std::endl;
         }
         
         // update the camera projection and view matrices based on the current camera position and orientation
