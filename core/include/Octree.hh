@@ -30,8 +30,9 @@ class Octree {
         
         
     private:
-        void insert(std::shared_ptr<Body> body, OctreeNode* node);
-
+        
+        void insert(std::shared_ptr<Body> body, OctreeNode* node, int depth);
+        void createChildren(OctreeNode* node);
 
         std::unique_ptr<OctreeNode> rootNode;
         int maxDepth;

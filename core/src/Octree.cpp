@@ -51,3 +51,57 @@ void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
     rootNode->position = rootPos;
     rootNode->data = OctreeNode::Leaf{};
 }
+
+
+void Octree::insert(std::shared_ptr<Body> body, OctreeNode* node, int depth) {
+
+
+    std::visit([&](auto& data) {
+        using T = std::decay_t<decltype(data)>;
+        if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
+            // if node is empty and is a leaf add the body
+            if (std::size(data.bodies) == 0){
+                data.bodies.push_back(body);
+            }
+            // if node is a leaf but not emtpy, only add body if max depth is reached
+            else{
+                if (depth == maxDepth){
+                    data.bodies.push_back(body);
+                }
+                // create new children and push bodies based on position
+                else{
+                    node->data = OctreeNode::Node{};
+                    createChildren(node);
+                }
+        }
+
+        } else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
+
+            // push the body down one node dependend on its position
+            Octree::insert(body, newNode);
+
+        }
+    }, node->data);
+}
+
+
+void createChildren(OctreeNode* node) {
+    glm::dvec3 nodePos = node->position;
+    double halfLength = node->halfLength;
+    double childHalfLength = halfLength/2.0;
+    OctreeNode::Node children;
+    int x = 1;
+    int y = 1;
+    int z = 1;
+
+    for (int i=0; i<8; i++){
+        int x = (i & 1) ? 1 : -1;
+        int y = (i & 2) ? 1 : -1;
+        int z = (i & 4) ? 1 : -1;
+        glm::dvec3 childPos = nodePos + childHalfLength * glm::dvec3(x,y,z);
+        children.children[i] = std::make_shared<OctreeNode>();
+        children.children[i]->position = childPos;
+        children.children[i]->halfLength = childHalfLength;
+        children.children[i]->data = OctreeNode::Leaf{};
+    }
+}
