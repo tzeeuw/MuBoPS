@@ -1,7 +1,9 @@
 #include <Octree.hh>
 #include <algorithm>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/component_wise.hpp>
-
+#include <iostream>
+#include <glm/gtx/string_cast.hpp>
 
 struct OctreeNode {
 
@@ -22,6 +24,11 @@ struct OctreeNode {
 
     std::variant<Leaf, Node> data; 
 };
+
+
+
+Octree::Octree(int maxDepth): maxDepth(maxDepth) {rootNode = std::make_unique<OctreeNode>();};
+Octree::~Octree() = default;
  
 void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
 
@@ -61,7 +68,7 @@ void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
 }
 
 
-void computeCOM(OctreeNode* node) {
+void Octree::computeCOM(OctreeNode* node) {
     double totalMass = 0.0;
     glm::dvec3 COMPos = {0.0,0.0,0.0};
 
@@ -141,7 +148,7 @@ void Octree::insert(std::shared_ptr<Body> body, OctreeNode* node, int depth) {
 }
 
 
-OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node){
+OctreeNode* Octree::findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node){
     // the next child is based on in which quadrant the body lays which is only dependent on the sign off the position
     glm::dvec3 bodyPos = body->getPosition();
 
@@ -159,7 +166,7 @@ OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node){
 }
 
 
-void createChildren(OctreeNode* node) {
+void Octree::createChildren(OctreeNode* node) {
     glm::dvec3 nodePos = node->position;
     double halfLength = node->halfLength;
     double childHalfLength = halfLength/2.0;
@@ -186,4 +193,65 @@ void createChildren(OctreeNode* node) {
     }
 
     node->data = children;
+}
+
+std::vector<std::pair<glm::dvec3, double>> Octree::getRenderData(bool leavesOnly){
+
+    std::vector<std::pair<glm::dvec3, double>> renderData;
+
+    // pass renderData as reference to conserve memory
+    getRenderDataHelper(rootNode.get(), leavesOnly, renderData);
+
+    return renderData;
+}
+
+void Octree::getRenderDataHelper(OctreeNode* node, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData){
+    std::visit([&](auto& data) {
+        using T = std::decay_t<decltype(data)>;
+
+        // if it is a leave just add the render data
+        if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
+            renderData.push_back(std::pair<glm::dvec3, double>(node->position, node->halfLength));
+        }
+        // if it is a node add the node data if leavesonly is false and add all child data
+        else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
+            if (!leavesOnly){
+                renderData.push_back(std::pair<glm::dvec3, double>(node->position, node->halfLength));
+            }
+
+            // for each child add the render data
+            for (auto& child: data.children){
+                OctreeNode* childptr = child.get();
+                getRenderDataHelper(childptr, leavesOnly, renderData);
+            }
+        }
+    }, node->data);
+}
+
+
+void Octree::debugPrint(){
+    printTreeHelper(rootNode.get(), 0);
+}
+
+void Octree::printTreeHelper(OctreeNode* node, int depth){
+    // based on depth print number of spaces
+    std::string prefix(4*depth, ' ');
+    std::cout << prefix;
+
+    std::visit([&](auto& data) {
+        using T = std::decay_t<decltype(data)>;
+        if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
+            std::cout << "Leaf(" << glm::to_string(node->position) << ", " << node->totalMass << ", " << glm::to_string(node->centerOfMassPosition) << ")" << std::endl
+            << prefix << "    bodies:" << std::endl;
+            for (auto& body: data.bodies){
+                std::cout << prefix << "    postion: " << glm::to_string(body->getPosition()) << ", mass: " << body->getMass() << std::endl;
+            }
+        } else if constexpr(std::is_same_v<T, OctreeNode::Node>) {
+            std::cout << "Node(" << glm::to_string(node->position) << ", " << node->totalMass << ", " << glm::to_string(node->centerOfMassPosition) << ")" << std::endl;
+            for (auto& child: data.children){
+                OctreeNode* childptr = child.get();
+                printTreeHelper(childptr, depth + 1);
+            }
+        }
+    }, node->data);
 }

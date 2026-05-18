@@ -2,7 +2,8 @@ set(SOURCE_FILES
     src/ClassicalBody.cpp
     src/Simulation.cpp
     src/QuantumBody.cpp
-    src/Renderer.cpp)
+    src/Renderer.cpp
+    src/Octree.cpp)
 
 add_library(core_lib ${SOURCE_FILES})
 
@@ -15,7 +16,7 @@ target_link_libraries(core_lib PUBLIC glfw glad glm)
 
 
 add_executable(core
-    src/main.cpp
+    src/octreeTest.cpp
 )
 target_link_libraries(core PRIVATE core_lib)
 

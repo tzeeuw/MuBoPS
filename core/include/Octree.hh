@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <utility>
 
 struct OctreeNode;
 
@@ -13,8 +14,8 @@ struct OctreeNode;
 class Octree {
     public:
 
-        Octree() {};
-        ~Octree() = default;
+        Octree(int maxDepth = 6);
+        ~Octree();
 
         struct MassAggregate {
             glm::dvec3 centerOfMass;
@@ -22,6 +23,9 @@ class Octree {
         };
 
         void buildTree(std::vector<std::shared_ptr<Body>> bodies);
+        void debugPrint();
+
+        std::vector<std::pair<glm::dvec3, double>> getRenderData(bool leavesOnly = false);
 
         
         std::vector<MassAggregate> BarnesHut(glm::dvec3 position, double theta);
@@ -35,6 +39,8 @@ class Octree {
         void createChildren(OctreeNode* node);
         void computeCOM(OctreeNode* node);
         OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node);
+        void getRenderDataHelper(OctreeNode* node, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData);
+        void printTreeHelper(OctreeNode* node, int depth);
 
         std::unique_ptr<OctreeNode> rootNode;
         int maxDepth;
