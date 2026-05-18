@@ -50,8 +50,56 @@ void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
     rootNode->centerOfMassPosition = COMPos;
     rootNode->position = rootPos;
     rootNode->data = OctreeNode::Leaf{};
+
+    // now insert all the bodies
+    for (auto& body: bodies) {
+        insert(body, rootNode.get(), 0);
+    }
+
+    // calculate all the center of masses for the nodes
+    computeCOM(rootNode.get());
 }
 
+
+void computeCOM(OctreeNode* node) {
+    double totalMass = 0.0;
+    glm::dvec3 COMPos = {0.0,0.0,0.0};
+
+    // based on the node we either calculate the leaf mass, or recursively calculate the mass
+    std::visit([&](auto& data) {
+        using T = std::decay_t<decltype(data)>;
+
+        // if node is a leaf, calculate COM of the bodies
+        if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
+            for (auto& body: data.bodies){
+                glm::dvec3 pos = body->getPosition();
+                double mass = body->getMass();
+                totalMass += mass;
+                COMPos += mass * pos;
+            }
+        } else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
+
+            // if node is not a leaf, calculate COM of the children
+            for (auto& child: data.children){
+                OctreeNode* childptr = child.get();
+                computeCOM(childptr);
+                double childmass = childptr->totalMass;
+                totalMass += childmass;
+                COMPos += childptr->centerOfMassPosition * childmass;
+            } 
+        }
+    }, node->data);
+
+    // prevent division by 0
+    if (totalMass == 0.0){
+        COMPos = node->position;
+    }
+    else {
+        COMPos /= totalMass;
+    }
+    node->totalMass = totalMass;
+    node->centerOfMassPosition = COMPos;
+}
 
 void Octree::insert(std::shared_ptr<Body> body, OctreeNode* node, int depth) {
 
@@ -70,18 +118,44 @@ void Octree::insert(std::shared_ptr<Body> body, OctreeNode* node, int depth) {
                 }
                 // create new children and push bodies based on position
                 else{
+                    std::shared_ptr<Body> body1 = data.bodies[0];
+
                     node->data = OctreeNode::Node{};
                     createChildren(node);
+
+                    OctreeNode* newNode1 = findClosestChildNode(body1, node);
+                    insert(body1, newNode1, depth + 1);
+
+                    OctreeNode* newNode2 = findClosestChildNode(body, node);
+                    insert(body, newNode2, depth + 1);
                 }
         }
 
         } else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
-
             // push the body down one node dependend on its position
-            Octree::insert(body, newNode);
+            OctreeNode* newNode = findClosestChildNode(body, node);
+            Octree::insert(body, newNode, depth + 1);
 
         }
     }, node->data);
+}
+
+
+OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node){
+    // the next child is based on in which quadrant the body lays which is only dependent on the sign off the position
+    glm::dvec3 bodyPos = body->getPosition();
+
+    // calculates if the body is larger or smaller than the node position to determine in what quadrant it lies
+    bool px = bodyPos.x > node->position.x;
+    bool py = bodyPos.y > node->position.y;
+    bool pz = bodyPos.z > node->position.z;
+
+    // index is now based on which quadrant it lies in corresponding to the create children method
+    int index = (px ? 1 : 0) | (py ? 2 : 0) | (pz ? 4 : 0);
+
+    auto data = std::get<OctreeNode::Node>(node->data);
+
+    return data.children[index].get();
 }
 
 
@@ -94,7 +168,13 @@ void createChildren(OctreeNode* node) {
     int y = 1;
     int z = 1;
 
+    // create the 8 different children
     for (int i=0; i<8; i++){
+
+        // based on i, determine in which quadrant the child is
+        // i => 4 is in positive z region
+        // odd i is in positive x region
+        // i=2,3,6,7 is in positive y region
         int x = (i & 1) ? 1 : -1;
         int y = (i & 2) ? 1 : -1;
         int z = (i & 4) ? 1 : -1;
@@ -104,4 +184,6 @@ void createChildren(OctreeNode* node) {
         children.children[i]->halfLength = childHalfLength;
         children.children[i]->data = OctreeNode::Leaf{};
     }
+
+    node->data = children;
 }
