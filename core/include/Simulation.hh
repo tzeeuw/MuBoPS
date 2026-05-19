@@ -15,6 +15,7 @@
 #include <memory>
 #include <algorithm>
 #include <Units.hh>
+#include <Octree.hh>
 
 
 /**
@@ -23,7 +24,7 @@
  */
 class Simulation {
     public:
-        Simulation(Units& units): units(units) {};
+        Simulation(Units& units, int octreeDepth = 1): units(units), octree(octreeDepth) {};
         ~Simulation() {};
 
         /// @name Body management
@@ -48,6 +49,8 @@ class Simulation {
         /// @{
         std::vector<glm::vec4> getClassicalRenderData(const glm::dvec3& cameraPos);
         std::vector<glm::vec4> getQuantumRenderData(const glm::dvec3& cameraPos);
+        std::vector<std::pair<glm::dvec3, double>> getOctreeRenderData(glm::dvec3 cameraPos) {return octree.getRenderData(cameraPos);};
+
         /// @}
         
         
@@ -55,4 +58,5 @@ class Simulation {
         Units& units;
         std::vector<std::shared_ptr<Body>> bodies;      ///< Collection of all bodies in the simulation
         std::vector<std::pair<std::shared_ptr<Body>, std::shared_ptr<Body>>> gravityPairs;
+        Octree octree;
     };

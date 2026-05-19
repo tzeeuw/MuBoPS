@@ -25,7 +25,7 @@ class Octree {
         void buildTree(std::vector<std::shared_ptr<Body>> bodies);
         void debugPrint();
 
-        std::vector<std::pair<glm::dvec3, double>> getRenderData(bool leavesOnly = false);
+        std::vector<std::pair<glm::dvec3, double>> getRenderData(glm::dvec3 cameraPos, bool leavesOnly = false);
 
         
         std::vector<MassAggregate> BarnesHut(glm::dvec3 position, double theta);
@@ -39,7 +39,7 @@ class Octree {
         void createChildren(OctreeNode* node);
         void computeCOM(OctreeNode* node);
         OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node);
-        void getRenderDataHelper(OctreeNode* node, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData);
+        void getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData);
         void printTreeHelper(OctreeNode* node, int depth);
 
         std::unique_ptr<OctreeNode> rootNode;

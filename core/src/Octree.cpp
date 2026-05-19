@@ -195,34 +195,34 @@ void Octree::createChildren(OctreeNode* node) {
     node->data = children;
 }
 
-std::vector<std::pair<glm::dvec3, double>> Octree::getRenderData(bool leavesOnly){
+std::vector<std::pair<glm::dvec3, double>> Octree::getRenderData(glm::dvec3 cameraPos, bool leavesOnly){
 
     std::vector<std::pair<glm::dvec3, double>> renderData;
 
     // pass renderData as reference to conserve memory
-    getRenderDataHelper(rootNode.get(), leavesOnly, renderData);
+    getRenderDataHelper(rootNode.get(), cameraPos, leavesOnly, renderData);
 
     return renderData;
 }
 
-void Octree::getRenderDataHelper(OctreeNode* node, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData){
+void Octree::getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData){
     std::visit([&](auto& data) {
         using T = std::decay_t<decltype(data)>;
 
         // if it is a leave just add the render data
         if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
-            renderData.push_back(std::pair<glm::dvec3, double>(node->position, node->halfLength));
+            renderData.push_back(std::pair<glm::dvec3, double>(node->position - cameraPos, node->halfLength));
         }
         // if it is a node add the node data if leavesonly is false and add all child data
         else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
             if (!leavesOnly){
-                renderData.push_back(std::pair<glm::dvec3, double>(node->position, node->halfLength));
+                renderData.push_back(std::pair<glm::dvec3, double>(node->position - cameraPos, node->halfLength));
             }
 
             // for each child add the render data
             for (auto& child: data.children){
                 OctreeNode* childptr = child.get();
-                getRenderDataHelper(childptr, leavesOnly, renderData);
+                getRenderDataHelper(childptr, cameraPos, leavesOnly, renderData);
             }
         }
     }, node->data);

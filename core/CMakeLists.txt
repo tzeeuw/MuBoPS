@@ -16,9 +16,14 @@ target_link_libraries(core_lib PUBLIC glfw glad glm)
 
 
 add_executable(core
-    src/octreeTest.cpp
+    src/main.cpp
 )
+add_executable(test
+    tests/octreeTest.cpp
+)
+
 target_link_libraries(core PRIVATE core_lib)
+target_link_libraries(test PRIVATE core_lib)
 
 pybind11_add_module(mubops_core src/bindings.cpp)
 target_link_libraries(mubops_core PRIVATE core_lib)

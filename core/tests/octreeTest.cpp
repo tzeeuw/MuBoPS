@@ -1,6 +1,3 @@
-/*
-* This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
-*/
 #include <Renderer.hh>
 #include <Simulation.hh>
 #include <ClassicalBody.hh>
@@ -35,7 +32,7 @@ int main() {
         // double phi = phiDist(mt);
         double radius = std::sqrt(minRadius*minRadius + radDist(mt)*(maxRadius*maxRadius - minRadius*minRadius));
         glm::dvec3 position = glm::dvec3(std::cos(angle) * radius,  std::sin(angle) * radius, 0);
-        body->setGravity(true, true);
+        // body->setGravity(true, true);
         body->setPosition(position);
         body->setMass(1.0);
 
@@ -48,10 +45,8 @@ int main() {
         bodies.push_back(body);
     }
 
-    // auto qbody = std::make_unique<QuantumBody>(100,100,100);
-    // bodies.push_back(std::move(qbody));
-    sim.addBodies(bodies);
 
+    sim.addBodies(bodies);
 
     renderer.setupWindow(800, 800);
     renderer.setupShaders();

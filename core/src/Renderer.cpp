@@ -57,6 +57,16 @@ void Renderer::processInput(GLFWwindow* window) {
         cameraSpeed = 1.5f;
     }
 
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        octreePressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE) {
+        if (octreePressed){
+            showOctree = !showOctree;
+            octreePressed = false;
+        }
+    }
+
     // update camera local coordinates after every input to enforce them being orthogonal
     cameraFront = glm::normalize(cameraFront);
     cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
@@ -279,7 +289,7 @@ void Renderer::setupShaders() {
     // add shaders to shader program map
     shaderPrograms["classical"] = createShaderProgram("core/shaders/point.vert", "core/shaders/classical.frag");
     shaderPrograms["quantum"] = createShaderProgram("core/shaders/point.vert", "core/shaders/quantum.frag");
-    shaderPrograms["trail"] = createShaderProgram("core/shaders/point.vert", "core/shaders/trail.frag");
+    shaderPrograms["octree"] = createShaderProgram("core/shaders/octree.vert", "core/shaders/octree.frag");
 }
 
 
@@ -299,6 +309,17 @@ void Renderer::setupObjects(){
     // add objects to the map
     vertexObjects["VBO"] = VBO;
     vertexObjects["VAO"] = VAO;
+
+    unsigned int octreeVBO, octreeVAO;
+    glGenVertexArrays(1, &octreeVAO);
+    glGenBuffers(1, &octreeVBO);
+    glBindVertexArray(octreeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, octreeVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    vertexObjects["octreeVBO"] = octreeVBO;
+    vertexObjects["octreeVAO"] = octreeVAO;
 }
 
 
@@ -328,6 +349,9 @@ void Renderer::setupCamera(){
     cameraLoc["quantum"].model = glGetUniformLocation(shaderPrograms["quantum"], "model");
     cameraLoc["quantum"].view = glGetUniformLocation(shaderPrograms["quantum"], "view");
     cameraLoc["quantum"].fov = glGetUniformLocation(shaderPrograms["quantum"], "fov");
+    cameraLoc["octree"].projection = glGetUniformLocation(shaderPrograms["octree"], "projection");
+    cameraLoc["octree"].model = glGetUniformLocation(shaderPrograms["octree"], "model");
+    cameraLoc["octree"].view = glGetUniformLocation(shaderPrograms["octree"], "view");
 }
 
 void Renderer::updateCamera(ShaderUniforms uniforms){
@@ -339,6 +363,30 @@ void Renderer::updateCamera(ShaderUniforms uniforms){
     glUniform1f(uniforms.fov, FOV);
 }
 
+std::vector<glm::vec3> Renderer::generateBox(std::pair<glm::dvec3, double> boxData){
+    std::vector<glm::vec3> renderData;
+    glm::dvec3 offset({0.0,0.0,0.0});
+    int indexpairs[3][2] = {
+        {1,2},
+        {0,2},
+        {0,1},
+    };
+
+    for (int i=0; i < 3; i++){
+        for (int jk = 0; jk < 4; jk++){
+            int j = (jk & 1) ? 1 : -1;
+            int k = (jk & 2) ? 1 : -1;
+
+            offset[indexpairs[i][0]] = j;
+            offset[indexpairs[i][1]] = k;
+            offset[i] = 1;
+            renderData.push_back(boxData.first + boxData.second*offset);
+            offset[i] = -1;
+            renderData.push_back(boxData.first + boxData.second*offset);
+        }
+    }
+    return renderData;
+}
 
 
 int Renderer::startRenderLoop() {
@@ -388,6 +436,9 @@ int Renderer::startRenderLoop() {
         std::vector<glm::vec4> classicalRenderData = simulation.getClassicalRenderData(cameraPos);
         int pointsClassical = static_cast<int>(classicalRenderData.size());
         
+        glBindVertexArray(vertexObjects["VAO"]);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["VBO"]);
+
         glUseProgram(shaderPrograms["classical"]);
         updateCamera(cameraLoc["classical"]);
         
@@ -409,6 +460,24 @@ int Renderer::startRenderLoop() {
         
         // enable it after rendering the quantum points
         glDepthMask(GL_TRUE);
+
+        // if octree rendering is enabled render te boxes
+        if (showOctree){
+            std::vector<glm::vec3> renderData;
+            std::vector<std::pair<glm::dvec3, double>> data = simulation.getOctreeRenderData(cameraPos);
+            for (auto& datapoint: data){
+                std::vector<glm::vec3> boxData = generateBox(datapoint);
+                renderData.insert(renderData.end(), boxData.begin(), boxData.end());
+            }
+
+            glBindVertexArray(vertexObjects["octreeVAO"]);
+            glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["octreeVBO"]);
+            glUseProgram(shaderPrograms["octree"]);
+            updateCamera(cameraLoc["octree"]);
+            glBufferData(GL_ARRAY_BUFFER, renderData.size() * sizeof(glm::vec3), renderData.data(), GL_DYNAMIC_DRAW);
+            glDrawArrays(GL_LINES, 0, static_cast<int>(renderData.size()));
+
+        }
         
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -418,6 +487,9 @@ int Renderer::startRenderLoop() {
     // delete shaders and buffers, terminate GLFW
     glDeleteProgram(shaderPrograms["classical"]);
     glDeleteProgram(shaderPrograms["quantum"]);
+    glDeleteProgram(shaderPrograms["octree"]);
+    glDeleteBuffers(1, &vertexObjects["octreeVBO"]);
+    glDeleteVertexArrays(1, &vertexObjects["octreeVAO"]);
     glDeleteBuffers(1, &vertexObjects["VBO"]);
     glDeleteVertexArrays(1, &vertexObjects["VAO"]);
     glfwTerminate();

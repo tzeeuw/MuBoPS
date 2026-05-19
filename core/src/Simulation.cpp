@@ -42,6 +42,8 @@ void Simulation::initGravityPairs() {
 void Simulation::update(double dt) {
 
     // update each body in the simulation by calling its update method
+    octree.buildTree(bodies);
+    // octree.debugPrint();
     updateGravity(dt);
     for (auto& body: bodies) {
         body->update(dt, units);

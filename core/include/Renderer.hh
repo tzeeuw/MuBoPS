@@ -77,6 +77,7 @@ class Renderer {
         /// @{
         unsigned int loadShader(const char* Path, GLenum shaderType);
         unsigned int createShaderProgram(const char* vertPath, const char* fragPath);
+        std::vector<glm::vec3> generateBox(std::pair<glm::dvec3, double> boxData);
         /// @}
 
     private:
@@ -88,6 +89,8 @@ class Renderer {
         
         bool mousePressed = false;                              ///< Flag to track whether the left mouse button is currently pressed, used for enabling camera rotation based on mouse movement
         bool firstPress = true;                                 ///< Flag to track the initial state of mouse press, used to prevent sudden jumps in camera orientation when the mouse is first pressed
+        bool showOctree = false;
+        bool octreePressed = false;
         float lastX = 400.0f;                                   ///< Initial last X position of the mouse, set to the center of the window for calculating mouse movement offsets
         float lastY = 400.0f;                                   ///< Initial last Y position of the mouse, set to the center of the window for calculating mouse movement offsets
         
