@@ -4,6 +4,7 @@
 #include <glm/gtx/component_wise.hpp>
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
+#include <GLFW/glfw3.h>
 
 struct OctreeNode {
 
@@ -31,7 +32,9 @@ Octree::Octree(int maxDepth): maxDepth(maxDepth) {rootNode = std::make_unique<Oc
 Octree::~Octree() = default;
  
 void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
+    float now = glfwGetTime();
 
+    // std::cout << "start tree building" << std::endl;
     // retrieve half length of the root node
     glm::dvec3 minPos = {DBL_MAX, DBL_MAX, DBL_MAX};
     glm::dvec3 maxPos = {-DBL_MAX, -DBL_MAX, -DBL_MAX};
@@ -46,9 +49,9 @@ void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
         totalMass += mass;
         COMPos += mass * pos;
     };
-
+    
     COMPos /= totalMass;
-
+    
     double halfLength = glm::compMax((maxPos - minPos) / 2.0);
     glm::dvec3 rootPos = (minPos + maxPos) / 2.0;
     // add small increment so that no body falls outside
@@ -57,14 +60,19 @@ void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
     rootNode->centerOfMassPosition = COMPos;
     rootNode->position = rootPos;
     rootNode->data = OctreeNode::Leaf{};
+    // std::cout << "Finished root node: " << glfwGetTime() - now << "s" << std::endl;
+    // now = glfwGetTime();
 
     // now insert all the bodies
     for (auto& body: bodies) {
         insert(body, rootNode.get(), 0);
     }
+    // std::cout << "Inserted bodies: " << glfwGetTime() - now << "s" << std::endl;
+    // now = glfwGetTime();
 
     // calculate all the center of masses for the nodes
     computeCOM(rootNode.get());
+    // std::cout << "Computed node COMs: " << glfwGetTime() - now << "s" << std::endl;
 }
 
 
@@ -251,6 +259,52 @@ void Octree::printTreeHelper(OctreeNode* node, int depth){
             for (auto& child: data.children){
                 OctreeNode* childptr = child.get();
                 printTreeHelper(childptr, depth + 1);
+            }
+        }
+    }, node->data);
+}
+
+
+
+std::vector<Octree::MassAggregate> Octree::BarnesHut(glm::dvec3 position, double theta){
+    std::vector<Octree::MassAggregate> masses;
+    BarnesHutHelper(rootNode.get(), position, theta, masses);
+    return masses;
+}
+
+void Octree::BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, std::vector<Octree::MassAggregate> &masses){
+
+    std::visit([&](auto& data) {
+        using T = std::decay_t<decltype(data)>;
+        if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
+            for (auto& body: data.bodies){
+                MassAggregate agg;
+                agg.centerOfMass = body->getPosition();
+
+                // skip the self contribution
+                if (glm::distance(position, agg.centerOfMass) < 1.0e-6){
+                    continue;
+                }
+                agg.totalMass = body->getMass();
+                masses.push_back(agg);
+            }
+        } else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
+            double distance = glm::distance(position, node->centerOfMassPosition);
+            double s = 2*node->halfLength;
+
+            // avoid division by 0 when computing s/d
+            if (distance < 1.0e-6){
+                distance = 1.0e-6;
+            }
+            if (s/distance > theta){
+                for (auto& child: data.children){
+                    BarnesHutHelper(child.get(), position, theta, masses);
+                }
+            } else {
+                MassAggregate agg;
+                agg.centerOfMass = node->centerOfMassPosition;
+                agg.totalMass = node->totalMass;
+                masses.push_back(agg);
             }
         }
     }, node->data);

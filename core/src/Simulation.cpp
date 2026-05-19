@@ -5,6 +5,9 @@
 #include <ClassicalBody.hh>
 #include <QuantumBody.hh>
 #include <iostream>
+#include <GLFW/glfw3.h>
+
+double avg = 0.0;
 
 void Simulation::removeBody(std::shared_ptr<Body>& body) {
 
@@ -42,12 +45,20 @@ void Simulation::initGravityPairs() {
 void Simulation::update(double dt) {
 
     // update each body in the simulation by calling its update method
+    // auto t1 = glfwGetTime();
     octree.buildTree(bodies);
+    // auto t2 = glfwGetTime();
+    // avg = 0.0;
     // octree.debugPrint();
-    updateGravity(dt);
+    // updateGravity(dt);
     for (auto& body: bodies) {
+        updateGravityBH(body, 0.8, 1e-2);
         body->update(dt, units);
     }
+
+    // auto t3 = glfwGetTime();
+    // std::cout << "build: " << t2-t1 << " BH: " << t3-t2 << std::endl;
+    // std::cout << "average masses: " << avg/bodies.size() << std::endl;
 }
 
 void Simulation::updateGravity(double dt) {
@@ -62,13 +73,28 @@ void Simulation::updateGravity(double dt) {
         glm::dvec3 dpos = pos2 - pos1;
         double dist = glm::length(dpos);
 
-        if (dist == 0.0) {
-            continue;
+        if (dist < 1e-2) {
+            dist = 1e-2;
         }
 
         newAcceleration += units.G * cbody2->getMass() * dpos / (dist * dist * dist);
         cbody1->setNewAcceleration(newAcceleration);
     }
+}
+
+void Simulation::updateGravityBH(std::shared_ptr<Body>& body, double theta, double eps){
+
+    glm::dvec3 newAcceleration = body->getNewAcceleration();
+    glm::dvec3 bodyPos = body->getPosition();
+    std::vector<Octree::MassAggregate> masses = octree.BarnesHut(bodyPos, theta);
+    avg += masses.size();
+    for (auto& mass: masses){
+        glm::dvec3 dpos = mass.centerOfMass - bodyPos;
+        double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
+
+        newAcceleration += units.G * mass.totalMass * dpos / (dist * dist * dist);
+    }
+    body->setNewAcceleration(newAcceleration);
 }
 
 // void Simulation::updateGravity(double dt) {

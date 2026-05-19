@@ -41,6 +41,8 @@ class Octree {
         OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node);
         void getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData);
         void printTreeHelper(OctreeNode* node, int depth);
+        void BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, std::vector<MassAggregate>& masses);
+
 
         std::unique_ptr<OctreeNode> rootNode;
         int maxDepth;

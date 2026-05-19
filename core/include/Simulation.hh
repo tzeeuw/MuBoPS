@@ -24,7 +24,7 @@
  */
 class Simulation {
     public:
-        Simulation(Units& units, int octreeDepth = 1): units(units), octree(octreeDepth) {};
+        Simulation(Units& units, int octreeDepth = 6): units(units), octree(octreeDepth) {};
         ~Simulation() {};
 
         /// @name Body management
@@ -44,6 +44,7 @@ class Simulation {
 
         void update(double dt);
         void updateGravity(double dt);
+        void updateGravityBH(std::shared_ptr<Body>& body, double theta, double eps);
 
         /// @name Data retrieval for rendering
         /// @{

@@ -12,7 +12,7 @@
 int main() {
     Units units = Units();
     units.setScale("Stellar");
-    Simulation sim = Simulation(units);
+    Simulation sim = Simulation(units, 5);
     Renderer renderer = Renderer(sim);
 
 
@@ -32,16 +32,25 @@ int main() {
         // double phi = phiDist(mt);
         double radius = std::sqrt(minRadius*minRadius + radDist(mt)*(maxRadius*maxRadius - minRadius*minRadius));
         glm::dvec3 position = glm::dvec3(std::cos(angle) * radius,  std::sin(angle) * radius, 0);
-        // body->setGravity(true, true);
+        body->setGravity(true, true);
         body->setPosition(position);
-        body->setMass(1.0);
+        body->setMass(0.0001);
 
         // calculate the velocity size
         double velSize = std::sqrt(units.G * 1.989e30 / units.massScale / radius)/radius;
-        std::cout << velSize << std::endl;
+        // std::cout << velSize << std::endl;
         glm::dvec3 velocity = glm::dvec3(-position[1], position[0], position[2]) * velSize;
         body->setVelocity(velocity);
         body->setAcceleration({0.0, 0.0, 0.0});
+
+        if (i == 1){
+            body->setPosition({0.0,0.0,0.0});
+            body->setMass(1.0);
+            body->setVelocity({0.0,0.0,0.0});
+        }
+        if (i == 2){
+            body->setMass(1.0);
+        }
         bodies.push_back(body);
     }
 

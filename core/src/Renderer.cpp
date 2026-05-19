@@ -424,7 +424,7 @@ int Renderer::startRenderLoop() {
         for (int i = 0; i < 10; i++){
             simulation.update(0.001);
         }
-        if (step % 10 == 0){
+        if (step % 1 == 0){
             std::cout << glfwGetTime() - now  << "s" << std::endl;
         }
         
