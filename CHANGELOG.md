@@ -1,3 +1,13 @@
+## [0.4.0] 2026-21-01
+## Added
+- Added tree body storage based on octree to the simulation
+- Added visualisation of the octree during rendering using hotkeys
+## Changed
+- Changed gravity calculations to the Barnes-Hut algorithm using an octree
+## Bug Fixes
+- Fixed a bug where acceleration would go to infinite due to two bodies having 0 distance between eachother. It now uses a minimal small distance.
+
+
 ## [0.3.1] 2026-05-01
 ## Changed
 - rendering is now based on floating origin for higher precision calculations
