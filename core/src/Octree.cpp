@@ -16,13 +16,10 @@ struct OctreeNode {
         std::vector<std::shared_ptr<Body>> bodies;
     };
 
-
     glm::dvec3 position;
     double halfLength;
-
     double totalMass;
     glm::dvec3 centerOfMassPosition;
-
     std::variant<Leaf, Node> data; 
 };
 
@@ -32,9 +29,7 @@ Octree::Octree(int maxDepth): maxDepth(maxDepth) {rootNode = std::make_unique<Oc
 Octree::~Octree() = default;
  
 void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
-    float now = glfwGetTime();
 
-    // std::cout << "start tree building" << std::endl;
     // retrieve half length of the root node
     glm::dvec3 minPos = {DBL_MAX, DBL_MAX, DBL_MAX};
     glm::dvec3 maxPos = {-DBL_MAX, -DBL_MAX, -DBL_MAX};
@@ -54,25 +49,21 @@ void Octree::buildTree(std::vector<std::shared_ptr<Body>> bodies){
     
     double halfLength = glm::compMax((maxPos - minPos) / 2.0);
     glm::dvec3 rootPos = (minPos + maxPos) / 2.0;
+
     // add small increment so that no body falls outside
     rootNode->halfLength = halfLength + 1e-6;
     rootNode->totalMass = totalMass;
     rootNode->centerOfMassPosition = COMPos;
     rootNode->position = rootPos;
     rootNode->data = OctreeNode::Leaf{};
-    // std::cout << "Finished root node: " << glfwGetTime() - now << "s" << std::endl;
-    // now = glfwGetTime();
 
     // now insert all the bodies
     for (auto& body: bodies) {
         insert(body, rootNode.get(), 0);
     }
-    // std::cout << "Inserted bodies: " << glfwGetTime() - now << "s" << std::endl;
-    // now = glfwGetTime();
 
     // calculate all the center of masses for the nodes
     computeCOM(rootNode.get());
-    // std::cout << "Computed node COMs: " << glfwGetTime() - now << "s" << std::endl;
 }
 
 

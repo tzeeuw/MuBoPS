@@ -45,20 +45,13 @@ void Simulation::initGravityPairs() {
 void Simulation::update(double dt) {
 
     // update each body in the simulation by calling its update method
-    // auto t1 = glfwGetTime();
     octree.buildTree(bodies);
-    // auto t2 = glfwGetTime();
-    // avg = 0.0;
     // octree.debugPrint();
     // updateGravity(dt);
     for (auto& body: bodies) {
         updateGravityBH(body, 0.8, 1e-2);
         body->update(dt, units);
     }
-
-    // auto t3 = glfwGetTime();
-    // std::cout << "build: " << t2-t1 << " BH: " << t3-t2 << std::endl;
-    // std::cout << "average masses: " << avg/bodies.size() << std::endl;
 }
 
 void Simulation::updateGravity(double dt) {
@@ -96,42 +89,6 @@ void Simulation::updateGravityBH(std::shared_ptr<Body>& body, double theta, doub
     }
     body->setNewAcceleration(newAcceleration);
 }
-
-// void Simulation::updateGravity(double dt) {
-
-//     for (auto& body1: bodies) {
-//         ClassicalBody* cbody1 = dynamic_cast<ClassicalBody*>(body1.get());
-//         if (!cbody1 || !cbody1->affectedByGravity){
-//             continue;
-//         }
-
-//         glm::dvec3 newAcceleration(0.0);
-//         glm::dvec3 position1 = cbody1->getPosition();
-
-//         for (auto& body2: bodies) {
-//             if (body1 == body2) {
-//                 continue;
-//             }
-//             ClassicalBody* cbody2 = dynamic_cast<ClassicalBody*>(body2.get());
-//             if (!cbody2 || !cbody2->exertsGravity){
-//                 continue;
-//             }
-
-//             glm::dvec3 position2 = cbody2->getPosition();
-//             glm::dvec3 dpos = position2 - position1;
-//             double dist = glm::length(dpos);
-
-//             if (dist == 0.0) {
-//                 continue;
-//             }
-
-//             newAcceleration += units.G * cbody2->getMass() * dpos / (dist * dist * dist);
-//         }
-
-//         cbody1->setNewAcceleration(newAcceleration);
-//     }
-//     return;
-// }
 
 
 std::vector<glm::vec4> Simulation::getQuantumRenderData(const glm::dvec3& cameraPos) {
