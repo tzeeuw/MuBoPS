@@ -26,7 +26,7 @@ int main() {
 
     double minRadius = 0.1;
     double maxRadius = 0.8;
-    for (int i = 0; i < 100; i++){
+    for (int i = 0; i < 1000; i++){
         auto body = std::make_shared<ClassicalBody>();
         double angle = angleDist(mt);
         // double phi = phiDist(mt);

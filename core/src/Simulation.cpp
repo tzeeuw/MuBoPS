@@ -45,13 +45,17 @@ void Simulation::initGravityPairs() {
 void Simulation::update(double dt) {
 
     // update each body in the simulation by calling its update method
+    // double t1 = glfwGetTime();
     octree.buildTree(bodies);
+    // double t2 = glfwGetTime();
     // octree.debugPrint();
     // updateGravity(dt);
     for (auto& body: bodies) {
         updateGravityBH(body, 0.8, 1e-2);
         body->update(dt, units);
     }
+    // double t3 = glfwGetTime();
+    // std::cout << "Tree building time: " << t2 - t1 << "s,  BH: " << t3 - t2 << "s" << std::endl;
 }
 
 void Simulation::updateGravity(double dt) {
@@ -76,18 +80,21 @@ void Simulation::updateGravity(double dt) {
 }
 
 void Simulation::updateGravityBH(std::shared_ptr<Body>& body, double theta, double eps){
+    // double t4 = glfwGetTime();
+    // glm::dvec3 newAcceleration = body->getNewAcceleration();
+    // glm::dvec3 bodyPos = body->getPosition();
+    octree.BarnesHut(body, theta, eps, units.G);
+    // avg += masses.size();
+    // double t5 = glfwGetTime();
+    // for (auto& mass: masses){
+    //     glm::dvec3 dpos = mass.centerOfMass - bodyPos;
+    //     double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
 
-    glm::dvec3 newAcceleration = body->getNewAcceleration();
-    glm::dvec3 bodyPos = body->getPosition();
-    std::vector<Octree::MassAggregate> masses = octree.BarnesHut(bodyPos, theta);
-    avg += masses.size();
-    for (auto& mass: masses){
-        glm::dvec3 dpos = mass.centerOfMass - bodyPos;
-        double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
-
-        newAcceleration += units.G * mass.totalMass * dpos / (dist * dist * dist);
-    }
-    body->setNewAcceleration(newAcceleration);
+    //     newAcceleration += units.G * mass.totalMass * dpos / (dist * dist * dist);
+    // }
+    // body->setNewAcceleration(newAcceleration);
+    // double t6 = glfwGetTime();
+    // std::cout << "Mass aggregating: " << t5 - t4 << "s, acceleration: " << t6 - t5 << "s" << std::endl;
 }
 
 

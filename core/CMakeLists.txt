@@ -5,6 +5,14 @@ set(SOURCE_FILES
     src/Renderer.cpp
     src/Octree.cpp)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+
 add_library(core_lib ${SOURCE_FILES})
 
 
@@ -13,7 +21,6 @@ target_include_directories(core_lib PUBLIC
 )
 
 target_link_libraries(core_lib PUBLIC glfw glad glm)
-
 
 add_executable(core
     src/main.cpp

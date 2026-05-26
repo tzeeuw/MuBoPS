@@ -57,7 +57,7 @@ class Octree {
         /// @param position Position in space for which to calculate the mass aggregate
         /// @param theta Threshold parameter for the Barnes-Hut approximation (smaller values yield more accurate results but require more computation)
         /// @return Vector of mass aggregates for the specified position
-        std::vector<MassAggregate> BarnesHut(glm::dvec3 position, double theta);
+        void BarnesHut(std::shared_ptr<Body>& body, double theta, double eps, double G);
         
         
         std::vector<std::shared_ptr<Body>> SPH(glm::dvec3 position, double cutOffRadius);
@@ -71,7 +71,7 @@ class Octree {
         OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node);
         void getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData);
         void printTreeHelper(OctreeNode* node, int depth);
-        void BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, std::vector<MassAggregate>& masses);
+        void BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, glm::dvec3& newAcceleration, double eps);
 
 
         std::unique_ptr<OctreeNode> rootNode;
