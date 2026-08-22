@@ -1,4 +1,4 @@
-## [0.4.0] 2026-21-01
+## [0.4.0] 2026-05-21
 ## Added
 - Added tree body storage based on octree to the simulation
 - Added visualisation of the octree during rendering using hotkeys
