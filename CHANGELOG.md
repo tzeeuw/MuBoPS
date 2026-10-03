@@ -1,4 +1,9 @@
-## [0.4.0] 2026-21-01
+## [0.4.1] Upcomming release
+## Added
+- Added MacOS support
+
+
+## [0.4.0] 2026-05-01
 ## Added
 - Added tree body storage based on octree to the simulation
 - Added visualisation of the octree during rendering using hotkeys
