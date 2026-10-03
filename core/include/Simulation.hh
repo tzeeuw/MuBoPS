@@ -24,7 +24,7 @@
  */
 class Simulation {
     public:
-        Simulation(Units& units, int octreeDepth = 6): units(units), octree(octreeDepth) {};
+        Simulation(Units& units, int octreeDepth = 8): units(units), octree(octreeDepth) {};
         ~Simulation() {};
 
         /// @name Body management

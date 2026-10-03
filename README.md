@@ -36,12 +36,11 @@ This project is made as a hobby, the goal is to be accurate, but also have good 
 
 ### Features in developments:
 * Accretion disks 
-* Atomic and molecular wavefunctions
+* Atomic and molecular wavefunctions for hydrogen atom
+    * Improve rendering and visualization
 
 ### Planned features:
 * Fluid dynamics
 
-### Far Future planned features:
-* MacOS support
 
 The project will be open source and will be build in C++ and Python.
