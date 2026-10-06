@@ -48,8 +48,7 @@ pybind11_add_module(mubops_core src/bindings.cpp)
 # This has to be explicit on EACH target — CMake doesn't propagate a runtime-library
 # setting through target_link_libraries() the way it does with compile definitions.
 # Without this, a target with no flags set defaults to /MT (static runtime) on MSVC,
-# which is incompatible with glfw3.lib/glad.lib (built /MD) and with Python's own
-# runtime — causing the exact linker errors we were chasing.
+# which is incompatible with glfw3.lib/glad.lib (built /MD) and with Python's own runtime
 if (MSVC)
     set_property(TARGET core_lib PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
     set_property(TARGET core PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")

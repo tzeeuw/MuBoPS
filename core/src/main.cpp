@@ -41,7 +41,7 @@ int main() {
 
         // calculate the velocity size
         double velSize = std::sqrt(units.G * 1.989e30 / units.massScale / radius)/radius;
-        std::cout << velSize << std::endl;
+        // std::cout << velSize << std::endl;
         glm::dvec3 velocity = glm::dvec3(-position[1], position[0], position[2]) * velSize;
         body->setVelocity(velocity);
         body->setAcceleration({0.0, 0.0, 0.0});
