@@ -4,7 +4,6 @@ The goal is to simulate systems from small scale (particle physics) to large sca
 
 ## Getting Started
 ### Installing the project
-MacOS is currently not supported for this project but is planned. \
 To install the project, cmake or any other C++ compiler is required. OpenGL is also required for the project to work as it is used for visualisation. Other external libraries are included in the project and do not require seperate installation. \
 The example below is based on cmake. \
 First clone the repository
@@ -22,7 +21,7 @@ On Windows
 ```
 .\build\core\Debug\core
 ```
-On Linux
+On Linux/MacOS
 ```
 .\build\core\core
 ```
@@ -37,12 +36,11 @@ This project is made as a hobby, the goal is to be accurate, but also have good 
 
 ### Features in developments:
 * Accretion disks 
-* Atomic and molecular wavefunctions
+* Atomic and molecular wavefunctions for hydrogen atom
+    * Improve rendering and visualization
 
 ### Planned features:
 * Fluid dynamics
 
-### Far Future planned features:
-* MacOS support
 
 The project will be open source and will be build in C++ and Python.

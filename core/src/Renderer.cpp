@@ -253,6 +253,9 @@ int Renderer::setupWindow(int SCR_WIDTH, int SCR_HEIGHT) {
     // use core profile
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    // only use forward compatible context (enables MacOS support)
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
     // create the winow object
     window = glfwCreateWindow(int(SCR_WIDTH), int(SCR_HEIGHT), "MuBoPS OpenGL", NULL, NULL);
     if (window == NULL) {
