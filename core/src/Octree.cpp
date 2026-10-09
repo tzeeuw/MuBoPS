@@ -257,29 +257,37 @@ void Octree::printTreeHelper(OctreeNode* node, int depth){
 
 
 
-void Octree::BarnesHut(std::shared_ptr<Body>& body, double theta, double eps, double G){
-    glm::dvec3 newAcceleration = body->getNewAcceleration();
-    glm::dvec3 position = body->getPosition();
-    BarnesHutHelper(rootNode.get(), position, theta, newAcceleration, eps);
-    body->setNewAcceleration(G * newAcceleration);
+std::vector<Octree::MassAggregate> Octree::BarnesHut(glm::dvec3 position, double theta){
+    // glm::dvec3 newAcceleration = body->getNewAcceleration();
+    // glm::dvec3 position = body->getPosition();
+    // BarnesHutHelper(rootNode.get(), position, theta, newAcceleration, eps);
+    // body->setNewAcceleration(G * newAcceleration);
+    std::vector<Octree::MassAggregate> masses;
+    BarnesHutHelper(rootNode.get(), position, theta, masses);
+    return masses;
 }
 
-void Octree::BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, glm::dvec3& newAcceleration, double eps){
+void Octree::BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, std::vector<Octree::MassAggregate> &masses){
 
     std::visit([&](auto& data) {
         using T = std::decay_t<decltype(data)>;
         if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
             for (auto& body: data.bodies){
-                glm::dvec3 bodyPos = body->getPosition();
+                // glm::dvec3 bodyPos = body->getPosition();
+
+                MassAggregate agg;
+                agg.centerOfMass = body->getPosition();
 
                 // skip the self contribution
-                if (glm::distance(position, bodyPos) < 1.0e-6){
+                if (glm::distance(position, agg.centerOfMass) < 1.0e-6){
                     continue;
                 }
-                double bodyMass = body->getMass();
-                glm::dvec3 dpos = bodyPos - position;
-                double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
-                newAcceleration += bodyMass * dpos / (dist * dist * dist);
+                // double bodyMass = body->getMass();
+                // glm::dvec3 dpos = bodyPos - position;
+                // double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
+                // newAcceleration += bodyMass * dpos / (dist * dist * dist);
+                agg.totalMass = body->getMass();
+                masses.push_back(agg);
             }
         } else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
             double distance = glm::distance(position, node->centerOfMassPosition);
@@ -291,14 +299,18 @@ void Octree::BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta
             }
             if (s/distance > theta){
                 for (auto& child: data.children){
-                    BarnesHutHelper(child.get(), position, theta, newAcceleration, eps);
+                    BarnesHutHelper(child.get(), position, theta, masses);
                 }
             } else {
-                glm::dvec3 nodePos = node->centerOfMassPosition;
-                double nodeMass = node->totalMass;
-                glm::dvec3 dpos = nodePos - position;
-                double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
-                newAcceleration += nodeMass * dpos / (dist * dist * dist);
+                // glm::dvec3 nodePos = node->centerOfMassPosition;
+                // double nodeMass = node->totalMass;
+                // glm::dvec3 dpos = nodePos - position;
+                // double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
+                // newAcceleration += nodeMass * dpos / (dist * dist * dist);
+                MassAggregate agg;
+                agg.centerOfMass = node->centerOfMassPosition;
+                agg.totalMass = node->totalMass;
+                masses.push_back(agg);
             }
         }
     }, node->data);

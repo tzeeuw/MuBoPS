@@ -81,18 +81,19 @@ void Simulation::updateGravity(double dt) {
 
 void Simulation::updateGravityBH(std::shared_ptr<Body>& body, double theta, double eps){
     // double t4 = glfwGetTime();
-    // glm::dvec3 newAcceleration = body->getNewAcceleration();
-    // glm::dvec3 bodyPos = body->getPosition();
-    octree.BarnesHut(body, theta, eps, units.G);
+    glm::dvec3 newAcceleration = body->getNewAcceleration();
+    glm::dvec3 bodyPos = body->getPosition();
+    // octree.BarnesHut(body, theta, eps, units.G);
+    std::vector<Octree::MassAggregate> masses = octree.BarnesHut(bodyPos, theta);
     // avg += masses.size();
-    // double t5 = glfwGetTime();
-    // for (auto& mass: masses){
-    //     glm::dvec3 dpos = mass.centerOfMass - bodyPos;
-    //     double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
+    double t5 = glfwGetTime();
+    for (auto& mass: masses){
+        glm::dvec3 dpos = mass.centerOfMass - bodyPos;
+        double dist = std::sqrt(glm::length(dpos)*glm::length(dpos) + eps*eps);
 
-    //     newAcceleration += units.G * mass.totalMass * dpos / (dist * dist * dist);
-    // }
-    // body->setNewAcceleration(newAcceleration);
+        newAcceleration += units.G * mass.totalMass * dpos / (dist * dist * dist);
+    }
+    body->setNewAcceleration(newAcceleration);
     // double t6 = glfwGetTime();
     // std::cout << "Mass aggregating: " << t5 - t4 << "s, acceleration: " << t6 - t5 << "s" << std::endl;
 }

@@ -11,7 +11,7 @@ sim = mc.Simulation(units)
 
 minR = 0.1
 maxR = 0.8
-for i in range(2000):
+for i in range(100):
     body = mc.ClassicalBody()
     angle = random.uniform(0, 2 * 3.14159)
     phi = random.uniform(0, 3.14159)
