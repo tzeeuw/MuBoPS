@@ -535,7 +535,7 @@ int Renderer::startRenderLoop() {
         glUseProgram(shaderPrograms["skybox"]);
 
         glBindVertexArray(vertexObjects["skyboxVAO"]);
-        updateCamera(cameraLoc["skybox"], "skybox");
+        updateCamera(cameraLoc["skybox"]);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
