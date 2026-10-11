@@ -7,11 +7,11 @@ import numpy as np
 units = mc.Units()
 units.setScale("Stellar")
 
-sim = mc.Simulation(units)
+sim = mc.Simulation(units, 9)
 
 minR = 0.1
 maxR = 0.8
-for i in range(100):
+for i in range(1000):
     body = mc.ClassicalBody()
     angle = random.uniform(0, 2 * 3.14159)
     phi = random.uniform(0, 3.14159)
@@ -22,11 +22,11 @@ for i in range(100):
     body.setPosition(x, y, z)
     if i == 0:
         body.setMass(1.0)
-        body.setGravity(False, True)
+        body.setGravity(True, True)
         body.setPosition(0.0, 0.0, 0.0)
     else:
         body.setMass(0.1)
-        body.setGravity(True, False)
+        body.setGravity(True, True)
 
     # phi_tangent = random.uniform(0, 2*3.14159)
     # r_norm = radius/np.linalg.norm([x, y, z])

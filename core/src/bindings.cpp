@@ -36,7 +36,7 @@ PYBIND11_MODULE(mubops_core, m) {
         .def(py::init<int, int, int>());
 
     py::class_<Simulation>(m, "Simulation")
-        .def(py::init<Units&>())
+        .def(py::init<Units&, int>())
         .def("addBody", [](Simulation& sim, std::shared_ptr<Body> body) {
             sim.addBody(body);
         })

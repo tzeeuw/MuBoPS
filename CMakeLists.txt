@@ -33,6 +33,9 @@ FetchContent_MakeAvailable(glm)
 FetchContent_Declare(pybind11 GIT_REPOSITORY https://github.com/pybind/pybind11.git GIT_TAG stable)
 FetchContent_MakeAvailable(pybind11)
 
+# Also add STBI for image loading
+FetchContent_Declare(stb_image URL https://github.com/nothings/stb/raw/master/stb_image.h DOWNLOAD_NO_EXTRACT TRUE)
+FetchContent_MakeAvailable(stb_image)
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 message(STATUS "Using Python: ${Python_EXECUTABLE}")
@@ -42,6 +45,8 @@ add_library(glad external/glad/glad.c)
 target_include_directories(glad PUBLIC
     ${CMAKE_SOURCE_DIR}/external
 )
+add_library(stb_image INTERFACE)
+target_include_directories(stb_image INTERFACE ${stb_image_SOURCE_DIR})
 
 # Same runtime-library safety net for glad.
 if (MSVC)

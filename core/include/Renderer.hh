@@ -16,6 +16,7 @@
 #include <Simulation.hh>
 #include <map>
 #include <glm/gtc/type_ptr.hpp>
+#include <filesystem>
 
 /**
  * @class Renderer
@@ -52,6 +53,7 @@ class Renderer {
         void setupCamera();
         void setupShaders();
         int startRenderLoop();
+        void createSkyBox();
         /// @}
         
         /// @name Event handling methods
@@ -114,4 +116,42 @@ class Renderer {
         std::map<std::string, unsigned int> shaderPrograms;     ///< Map to store shader program IDs with string keys for easy access when rendering different types of bodies (classical vs quantum)
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
         std::map<std::string, ShaderUniforms> cameraLoc;        ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
-};
+
+        // skybox
+        unsigned int cubemapTexture;
+        float skyboxVertices[24] = 
+            {
+                //   Coordinates
+                -1.0f, -1.0f,  1.0f,//        7--------6
+                1.0f, -1.0f,  1.0f,//        /|       /|
+                1.0f, -1.0f, -1.0f,//       4--------5 |
+                -1.0f, -1.0f, -1.0f,//      | |      | |
+                -1.0f,  1.0f,  1.0f,//      | 3------|-2
+                1.0f,  1.0f,  1.0f,//       |/       |/
+                1.0f,  1.0f, -1.0f,//       0--------1
+                -1.0f,  1.0f, -1.0f
+            };
+
+        unsigned int skyboxIndices[36] = 
+            {
+                // Right
+                1, 2, 6,
+                6, 5, 1,
+                // Left
+                0, 4, 7,
+                7, 3, 0,
+                // Top 
+                4, 5, 6,
+                6, 7, 4,
+                // Bottom
+                0, 3, 2,
+                2, 1, 0,
+                // Back
+                0, 1, 5,
+                5, 4, 0,
+                // Front
+                3, 7, 6,
+                6, 2, 3
+            };
+
+    };

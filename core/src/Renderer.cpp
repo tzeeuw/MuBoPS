@@ -5,6 +5,9 @@
 #include <iostream>
 #include <fstream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 
 void Renderer::processInput(GLFWwindow* window) {
 
@@ -293,6 +296,7 @@ void Renderer::setupShaders() {
     shaderPrograms["classical"] = createShaderProgram("core/shaders/point.vert", "core/shaders/classical.frag");
     shaderPrograms["quantum"] = createShaderProgram("core/shaders/point.vert", "core/shaders/quantum.frag");
     shaderPrograms["octree"] = createShaderProgram("core/shaders/octree.vert", "core/shaders/octree.frag");
+    shaderPrograms["skybox"] = createShaderProgram("core/shaders/skybox.vert", "core/shaders/skybox.frag");
 }
 
 
@@ -313,6 +317,8 @@ void Renderer::setupObjects(){
     vertexObjects["VBO"] = VBO;
     vertexObjects["VAO"] = VAO;
 
+
+    // Octree VAO, VBO's
     unsigned int octreeVBO, octreeVAO;
     glGenVertexArrays(1, &octreeVAO);
     glGenBuffers(1, &octreeVBO);
@@ -323,6 +329,25 @@ void Renderer::setupObjects(){
 
     vertexObjects["octreeVBO"] = octreeVBO;
     vertexObjects["octreeVAO"] = octreeVAO;
+
+    // Skybox VAO, VBO's
+    unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glGenBuffers(1, &skyboxEBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+
+    vertexObjects["skyboxVBO"] = skyboxVBO;
+    vertexObjects["skyboxVAO"] = skyboxVAO;
+    vertexObjects["skyboxEBO"] = skyboxEBO;
+    
 }
 
 
@@ -355,11 +380,18 @@ void Renderer::setupCamera(){
     cameraLoc["octree"].projection = glGetUniformLocation(shaderPrograms["octree"], "projection");
     cameraLoc["octree"].model = glGetUniformLocation(shaderPrograms["octree"], "model");
     cameraLoc["octree"].view = glGetUniformLocation(shaderPrograms["octree"], "view");
+    cameraLoc["skybox"].projection = glGetUniformLocation(shaderPrograms["skybox"], "projection");
+    cameraLoc["skybox"].model = glGetUniformLocation(shaderPrograms["skybox"], "model");
+    cameraLoc["skybox"].view = glGetUniformLocation(shaderPrograms["skybox"], "view");
 }
 
 void Renderer::updateCamera(ShaderUniforms uniforms){
 
     // update the camera projection and view matrices in the shader
+    // NOTE: because camera is ALWAYS at origin, 4th column for the skybox does not have to be 0, as it is always 0
+    // If camera behaviour changes to where camera can also move away form origin then translational motion of skybox
+    // becomes issue
+    // reason why camera is always at origin is due to double precision before casting it to floats for glm processing.
     glUniformMatrix4fv(uniforms.projection, 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(uniforms.model, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(uniforms.view, 1, GL_FALSE, glm::value_ptr(view));
@@ -392,6 +424,63 @@ std::vector<glm::vec3> Renderer::generateBox(std::pair<glm::dvec3, double> boxDa
 }
 
 
+void Renderer::createSkyBox(){
+
+    // skybox images
+    std::string filePathSTR = __FILE__;
+    std::filesystem::path filePath = filePathSTR;
+    std::string skyboxPath = filePath.parent_path().parent_path().string() + "/images/skybox/";
+    std::string Cubemap[6] = 
+    {
+        skyboxPath + "right.jpg",
+        skyboxPath + "left.jpg",
+        skyboxPath + "top.jpg",
+        skyboxPath + "bottom.jpg",
+        skyboxPath + "front.jpg",
+        skyboxPath + "back.jpg"
+    };
+
+    // create the cubemap texture object
+    glGenTextures(1, &cubemapTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    // cycle through all the textures and attach them to the texture object
+    for (unsigned int i = 0; i < 6; i ++)
+    {
+        int width, height, nrChannels;
+        unsigned char* data = stbi_load(Cubemap[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            stbi_set_flip_vertically_on_load(false);
+            glTexImage2D
+            (
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                GL_RGB,
+                width,
+                height,
+                0,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Failed to load texture:" << Cubemap[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+
+}
+
+
 int Renderer::startRenderLoop() {
     
     
@@ -407,6 +496,9 @@ int Renderer::startRenderLoop() {
 
     int step = 0;
 
+    // create skybox (FIXME make propper setup pipeline)
+    createSkyBox();
+
     simulation.initGravityPairs();
     
     while (!glfwWindowShouldClose(window)) {
@@ -418,8 +510,9 @@ int Renderer::startRenderLoop() {
         lastFrame = currentFrame;
 
         processInput(window);
-        // background color
-        glClearColor(7.0/255.0, 15.0/255.0, 28.0/255.0, 1.0f);
+        // // background color
+        // glClearColor(7.0/255.0, 15.0/255.0, 28.0/255.0, 1.0f);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
         // update the simulation for a few steps before rendering the next frame to ensure smooth animation
@@ -434,7 +527,25 @@ int Renderer::startRenderLoop() {
         // update the camera projection and view matrices based on the current camera position and orientation
         projection = glm::perspective(glm::radians(FOV), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
         view = glm::lookAt(glm::vec3(0.0f), cameraFront, cameraUp);
-        
+
+        // render the skybox
+        // use GL EQUAL so that skybox is rendered at depth 1.0
+        glDepthFunc(GL_LEQUAL);
+
+        glUseProgram(shaderPrograms["skybox"]);
+
+        glBindVertexArray(vertexObjects["skyboxVAO"]);
+        updateCamera(cameraLoc["skybox"], "skybox");
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+
+        // use GL LESS for normal behaviour again
+        glDepthFunc(GL_LESS);
+
         // first render the classical data
         std::vector<glm::vec4> classicalRenderData = simulation.getClassicalRenderData(cameraPos);
         int pointsClassical = static_cast<int>(classicalRenderData.size());
@@ -491,10 +602,14 @@ int Renderer::startRenderLoop() {
     glDeleteProgram(shaderPrograms["classical"]);
     glDeleteProgram(shaderPrograms["quantum"]);
     glDeleteProgram(shaderPrograms["octree"]);
+    glDeleteProgram(shaderPrograms["skybox"]);
     glDeleteBuffers(1, &vertexObjects["octreeVBO"]);
     glDeleteVertexArrays(1, &vertexObjects["octreeVAO"]);
     glDeleteBuffers(1, &vertexObjects["VBO"]);
     glDeleteVertexArrays(1, &vertexObjects["VAO"]);
+    glDeleteBuffers(1, &vertexObjects["skyboxVBO"]);
+    glDeleteBuffers(1, &vertexObjects["skyboxEBO"]);
+    glDeleteVertexArrays(1, &vertexObjects["skyboxVAO"]);
     glfwTerminate();
     
     return 0;

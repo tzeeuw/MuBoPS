@@ -30,7 +30,7 @@ target_include_directories(core_lib PUBLIC
     ${CMAKE_SOURCE_DIR}/core/include
 )
 
-target_link_libraries(core_lib PUBLIC glfw glad glm)
+target_link_libraries(core_lib PUBLIC glfw glad glm stb_image)
 
 add_executable(core
     src/main.cpp
