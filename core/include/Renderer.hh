@@ -134,22 +134,22 @@ class Renderer {
 
         unsigned int skyboxIndices[36] = 
             {
-                // Right
+                // Right px
                 1, 2, 6,
                 6, 5, 1,
-                // Left
+                // Left nx
                 0, 4, 7,
                 7, 3, 0,
-                // Top 
+                // Top py
                 4, 5, 6,
                 6, 7, 4,
-                // Bottom
+                // Bottom ny
                 0, 3, 2,
                 2, 1, 0,
-                // Back
+                // Back pz
                 0, 1, 5,
                 5, 4, 0,
-                // Front
+                // Front nz
                 3, 7, 6,
                 6, 2, 3
             };
