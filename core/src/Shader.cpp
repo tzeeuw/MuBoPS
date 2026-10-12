@@ -80,3 +80,15 @@ unsigned int Shader::loadShader(std::string path, GLenum shaderType){
     // if shader compiled bueno
     return shader;
 };
+
+
+void Shader::setMat4(const char* name, const glm::mat4& m) {
+    unsigned int loc = glGetUniformLocation(shaderProgram, name);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
+};
+
+
+void Shader::set1f(const char* name, float f){
+    unsigned int loc = glGetUniformLocation(shaderProgram, name);
+    glUniform1f(loc, f);
+};

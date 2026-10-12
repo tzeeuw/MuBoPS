@@ -5,6 +5,7 @@
 
 #include <string>
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 
 
@@ -19,7 +20,8 @@ class Shader {
 
         void use();
 
-        unsigned int getShaderID() {return shaderProgram;}
+        void setMat4(const char* name, const glm::mat4& m);
+        void Shader::set1f(const char* name, float f);
 
         
     private:

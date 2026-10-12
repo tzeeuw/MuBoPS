@@ -30,13 +30,6 @@
  */
 class Renderer {
 
-    struct ShaderUniforms {
-        unsigned int model;
-        unsigned int view;
-        unsigned int projection;
-        unsigned int fov;
-    };
-
     public:
 
         /// @brief Constructs a Renderer with a reference to the Simulation instance.
@@ -74,13 +67,11 @@ class Renderer {
         static void onScroll(GLFWwindow* window, double xoffset, double yoffset);
         void handleScroll(double xoffset, double yoffset);
         
-        void updateCamera(ShaderUniforms uniforms);
+        void applyCamera(Shader& shaderProgram);
         /// @}
             
         /// @name Shader utility methods
         /// @{
-        unsigned int loadShader(const char* Path, GLenum shaderType);
-        unsigned int createShaderProgram(const char* vertPath, const char* fragPath);
         std::vector<glm::vec3> generateBox(std::pair<glm::dvec3, double> boxData);
         /// @}
 
@@ -119,7 +110,6 @@ class Renderer {
         std::optional<Shader> quantumShader, skyboxShader;
 
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
-        std::map<std::string, ShaderUniforms> cameraLoc;        ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
 
         // skybox
         unsigned int cubemapTexture;

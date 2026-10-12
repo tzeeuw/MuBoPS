@@ -175,72 +175,6 @@ void Renderer::handleCursorMove(double xpos, double ypos){
 }
 
 
-// unsigned int Renderer::loadShader(const char* Path, GLenum shaderType) {
-    
-//     // open file
-//     std::ifstream shaderFile(Path);
-//     if (!shaderFile.is_open()) {
-//         std::cout << "Failed to open shader file: " << Path << std::endl;
-//         return 0;
-//     }
-    
-//     // read shader file into string
-//     std::string line;
-//     std::string fileContents;
-//     while (std::getline(shaderFile, line)) {
-//         fileContents += line + "\n";
-//     }
-    
-//     // cast string to const char*
-//     const char* shaderSource = fileContents.c_str();
-    
-//     // create the shader
-//     unsigned int shader = glCreateShader(shaderType);
-//     glShaderSource(shader, 1, &shaderSource, NULL);
-//     glCompileShader(shader);
-    
-//     // check compilation
-//     int success;
-//     char infoLog[512];
-    
-//     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-//     if (!success) {
-//         glGetShaderInfoLog(shader, 512, NULL, infoLog);
-//         std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << Path << "\n" << infoLog << std::endl;
-//     }
-    
-//     // return the shader ID
-//     return shader;
-// }
-// unsigned int Renderer::createShaderProgram(const char* vertPath, const char* fragPath) {
-    
-//     // load vertex and fragment shaders
-//     unsigned int vertexShader = loadShader(vertPath, GL_VERTEX_SHADER);
-//     unsigned int fragmentShader = loadShader(fragPath, GL_FRAGMENT_SHADER);
-    
-//     // create shaderprogam and link shaders
-//     unsigned int shaderProgram = glCreateProgram();
-//     glAttachShader(shaderProgram, vertexShader);
-//     glAttachShader(shaderProgram, fragmentShader);
-//     glLinkProgram(shaderProgram);
-    
-//     // check if shader program complied correctly
-//     int success;
-//     char infoLog[512];
-    
-//     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-//     if (!success) {
-//         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-//         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-//     }
-    
-//     // delete the shaders as they are now linked into the program and no longer necessary
-//     glDeleteShader(vertexShader);
-//     glDeleteShader(fragmentShader);
-    
-//     return shaderProgram;
-// }
-
 
 int Renderer::setupWindow(int SCR_WIDTH, int SCR_HEIGHT) {
 
@@ -366,36 +300,22 @@ void Renderer::setupCamera(){
     cameraSpeed = 1.5f;
     sensitivity = 0.3f;
     FOV = 45.0;
-
-
-    // setup camera projection and view matrices
-    cameraLoc["classical"].projection = glGetUniformLocation(classicalShader->getShaderID(), "projection");
-    cameraLoc["classical"].model = glGetUniformLocation(classicalShader->getShaderID(), "model");
-    cameraLoc["classical"].view = glGetUniformLocation(classicalShader->getShaderID(), "view");
-    cameraLoc["classical"].fov = glGetUniformLocation(classicalShader->getShaderID(), "fov");
-    cameraLoc["quantum"].projection = glGetUniformLocation(quantumShader->getShaderID(), "projection");
-    cameraLoc["quantum"].model = glGetUniformLocation(quantumShader->getShaderID(), "model");
-    cameraLoc["quantum"].view = glGetUniformLocation(quantumShader->getShaderID(), "view");
-    cameraLoc["quantum"].fov = glGetUniformLocation(quantumShader->getShaderID(), "fov");
-    cameraLoc["octree"].projection = glGetUniformLocation(octreeShader->getShaderID(), "projection");
-    cameraLoc["octree"].model = glGetUniformLocation(octreeShader->getShaderID(), "model");
-    cameraLoc["octree"].view = glGetUniformLocation(octreeShader->getShaderID(), "view");
-    cameraLoc["skybox"].projection = glGetUniformLocation(skyboxShader->getShaderID(), "projection");
-    cameraLoc["skybox"].model = glGetUniformLocation(skyboxShader->getShaderID(), "model");
-    cameraLoc["skybox"].view = glGetUniformLocation(skyboxShader->getShaderID(), "view");
 }
 
-void Renderer::updateCamera(ShaderUniforms uniforms){
+void Renderer::applyCamera(Shader& shaderProgram){
+
+    // first use the program
+    shaderProgram.use();
 
     // update the camera projection and view matrices in the shader
     // NOTE: because camera is ALWAYS at origin, 4th column for the skybox does not have to be 0, as it is always 0
     // If camera behaviour changes to where camera can also move away form origin then translational motion of skybox
     // becomes issue
     // reason why camera is always at origin is due to double precision before casting it to floats for glm processing.
-    glUniformMatrix4fv(uniforms.projection, 1, GL_FALSE, glm::value_ptr(projection));
-    glUniformMatrix4fv(uniforms.model, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(uniforms.view, 1, GL_FALSE, glm::value_ptr(view));
-    glUniform1f(uniforms.fov, FOV);
+    shaderProgram.setMat4("projection", projection);
+    shaderProgram.setMat4("model", model);
+    shaderProgram.setMat4("view", view);
+    shaderProgram.set1f("fov", FOV);
 }
 
 std::vector<glm::vec3> Renderer::generateBox(std::pair<glm::dvec3, double> boxData){
@@ -520,9 +440,9 @@ int Renderer::startRenderLoop() {
         for (int i = 0; i < 10; i++){
             simulation.update(0.001);
         }
-        if (step % 1 == 0){
-            std::cout << glfwGetTime() - now  << "s" << std::endl;
-        }
+        // if (step % 1 == 0){
+        //     std::cout << glfwGetTime() - now  << "s" << std::endl;
+        // }
         
         // update the camera projection and view matrices based on the current camera position and orientation
         projection = glm::perspective(glm::radians(FOV), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
@@ -532,10 +452,9 @@ int Renderer::startRenderLoop() {
         // use GL EQUAL so that skybox is rendered at depth 1.0
         glDepthFunc(GL_LEQUAL);
 
-        skyboxShader->use();
 
         glBindVertexArray(vertexObjects["skyboxVAO"]);
-        updateCamera(cameraLoc["skybox"]);
+        updateCamera(*skyboxShader);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -553,8 +472,7 @@ int Renderer::startRenderLoop() {
         glBindVertexArray(vertexObjects["VAO"]);
         glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["VBO"]);
 
-        classicalShader->use();
-        updateCamera(cameraLoc["classical"]);
+        updateCamera(*classicalShader);
         
         glBufferData(GL_ARRAY_BUFFER, classicalRenderData.size() * sizeof(glm::vec4), classicalRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsClassical);
@@ -566,8 +484,7 @@ int Renderer::startRenderLoop() {
         
         // make sure that alpha actually works by disabling depth
         glDepthMask(GL_FALSE);
-        quantumShader->use();
-        updateCamera(cameraLoc["quantum"]);
+        updateCamera(*quantumShader);
         
         glBufferData(GL_ARRAY_BUFFER, quantumRenderData.size() * sizeof(glm::vec4), quantumRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsQuantum);
@@ -586,8 +503,8 @@ int Renderer::startRenderLoop() {
 
             glBindVertexArray(vertexObjects["octreeVAO"]);
             glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["octreeVBO"]);
-            octreeShader->use();
-            updateCamera(cameraLoc["octree"]);
+            updateCamera(*octreeShader);
+
             glBufferData(GL_ARRAY_BUFFER, renderData.size() * sizeof(glm::vec3), renderData.data(), GL_DYNAMIC_DRAW);
             glDrawArrays(GL_LINES, 0, static_cast<int>(renderData.size()));
 
