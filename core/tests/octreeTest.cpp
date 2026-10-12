@@ -60,7 +60,6 @@ int main() {
     renderer.setupWindow(800, 800);
     renderer.setupShaders();
     renderer.setupObjects();
-    renderer.setupCamera();
     renderer.startRenderLoop();
 
     return 0;

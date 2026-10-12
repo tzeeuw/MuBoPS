@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 #include <Simulation.hh>
 #include <Shader.hh>
+#include <Camera.hh>
 #include <optional>
 #include <map>
 #include <glm/gtc/type_ptr.hpp>
@@ -28,6 +29,7 @@
  * It includes methods for handling user input, resizing the window, and updating the camera view based on mouse interactions.
  * The class interacts with the Simulation class to retrieve data for rendering both classical and quantum bodies in the simulation.
  */
+
 class Renderer {
 
     public:
@@ -45,7 +47,6 @@ class Renderer {
         /// @name Setup methods
         /// @{ 
         void setupObjects();
-        void setupCamera();
         void setupShaders();
         int startRenderLoop();
         void createSkyBox();
@@ -65,7 +66,7 @@ class Renderer {
         void handleCursorMove(double xpos, double ypos);
 
         static void onScroll(GLFWwindow* window, double xoffset, double yoffset);
-        void handleScroll(double xoffset, double yoffset);
+        void handleScroll(double yoffset);
         
         void applyCamera(Shader& shaderProgram);
         /// @}
@@ -88,26 +89,16 @@ class Renderer {
         bool octreePressed = false;
         float lastX = 400.0f;                                   ///< Initial last X position of the mouse, set to the center of the window for calculating mouse movement offsets
         float lastY = 400.0f;                                   ///< Initial last Y position of the mouse, set to the center of the window for calculating mouse movement offsets
-        
-        glm::vec3 cameraPos;                                    ///< Position of the camera in world space
-        glm::vec3 cameraFront;                                  ///< Front vector for the camera, used for calculating the view matrix
-        glm::vec3 cameraRight;                                  ///< right vector for the camera used for calculating the view matrix
-        glm::vec3 cameraUp;                                     ///< Up vector for the camera, used for calculating the view matrix and ensuring correct orientation of the camera in world space
-        
-        float FOV;                                              ///< Field of view for the perspective projection, used in the projection matrix to control the zoom level of the camera
-        float pitch = 0.0f;                                     ///< Initial pitch angle of the camera, used for calculating the camera's front vector based on mouse movement
-        float yaw = -90.0f;                                     ///< Initial yaw angle of the camera, set to 90 degrees to face towards the negative Z direction, used for calculating the camera's front vector based on mouse movement
-        float cameraSpeed;                                      ///< Speed of camera for keyboard input
-        float sensitivity;                                      ///< Speed of camera for mouse input
+                                  
+        float cameraSpeed = 1.5f;                                      ///< Speed of camera for keyboard input
+        float sensitivity = 0.3f;                                      ///< Speed of camera for mouse input
         float deltaTime = 0.0f;     // keep track of frame generation speed
         float lastFrame = 0.0f;
         
-        glm::mat4 model;                                        ///< Model matrix for transforming local to world coordinates
-        glm::mat4 view;                                         ///< View matrix for transforming world coordinates to camera view
-        glm::mat4 projection;                                   ///< Projection matrix for the perspective projection
-
         std::optional<Shader> octreeShader, classicalShader;
         std::optional<Shader> quantumShader, skyboxShader;
+
+        Camera camera;
 
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
 

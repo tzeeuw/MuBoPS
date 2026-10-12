@@ -4,7 +4,8 @@ set(SOURCE_FILES
     src/QuantumBody.cpp
     src/Renderer.cpp
     src/Octree.cpp
-    src/Shader.cpp)
+    src/Shader.cpp
+    src/Camera.cpp)
 
 
 if(NOT CMAKE_BUILD_TYPE)

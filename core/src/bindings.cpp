@@ -46,7 +46,6 @@ PYBIND11_MODULE(mubops_core, m) {
         .def(py::init<Simulation&>())
         .def("setupWindow", &Renderer::setupWindow)
         .def("setupObjects", &Renderer::setupObjects)
-        .def("setupCamera", &Renderer::setupCamera)
         .def("setupShaders", &Renderer::setupShaders)
         .def("startRenderLoop", &Renderer::startRenderLoop);
 

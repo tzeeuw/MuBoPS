@@ -22,35 +22,32 @@ void Renderer::processInput(GLFWwindow* window) {
 
     // WASD input
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraPos += velocity * cameraFront;
+        camera.moveForward(velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraPos -= velocity * cameraFront;
+        camera.moveForward(-velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        // for the right/left directions take the cross product with camera up and the front
-        cameraPos -= velocity * glm::normalize(glm::cross(cameraFront, cameraUp));
+        camera.moveRight(-velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos += velocity * glm::normalize(glm::cross(cameraFront, cameraUp));
+        camera.moveRight(velocity);
     }
 
     // up and down
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        cameraPos += velocity * cameraUp;
+        camera.moveUp(velocity);
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        cameraPos -= velocity * cameraUp;
+        camera.moveUp(-velocity);
     }
 
     // rol on q and e
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        glm::mat4 rollRot = glm::rotate(glm::mat4(1.0f), glm::radians(-rollSpeed), cameraFront);
-        cameraUp = glm::normalize(glm::vec3(rollRot * glm::vec4(cameraUp, 0.0f)));
+        camera.rotate(0, 0, rollSpeed);
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        glm::mat4 rollRot = glm::rotate(glm::mat4(1.0f), glm::radians(rollSpeed), cameraFront);
-        cameraUp = glm::normalize(glm::vec3(rollRot * glm::vec4(cameraUp, 0.0f)));
+        camera.rotate(0, 0, -rollSpeed);
     }
 
     // shift for speeding of camera
@@ -70,27 +67,16 @@ void Renderer::processInput(GLFWwindow* window) {
             octreePressed = false;
         }
     }
-
-    // update camera local coordinates after every input to enforce them being orthogonal
-    cameraFront = glm::normalize(cameraFront);
-    cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-    cameraUp    = glm::normalize(glm::cross(cameraRight, cameraFront));
 }
 
 
 void Renderer::onScroll(GLFWwindow* window, double xoffset, double yoffset) {
     Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
-    renderer->handleScroll(xoffset, yoffset);
+    renderer->handleScroll(yoffset);
 }
 
-void Renderer::handleScroll(double xoffset, double yoffset) {
-    FOV -= float(yoffset);
-    if (FOV < 1.0f) {
-        FOV = 1.0f;
-    }
-    if (FOV > 60.0f) {
-        FOV = 60.0f;
-    }
+void Renderer::handleScroll(double yoffset) {
+    camera.zoom(yoffset);
 }
 
 void Renderer::onResize(GLFWwindow* window, int width, int height) {
@@ -161,16 +147,8 @@ void Renderer::handleCursorMove(double xpos, double ypos){
         xoffset *= sensitivity;
         yoffset *= sensitivity;
 
-        // rotate around the camera's local axes
-        glm::mat4 yawRot = glm::rotate(glm::mat4(1.0f), glm::radians(-xoffset), cameraUp);
-        glm::mat4 pitchRot = glm::rotate(glm::mat4(1.0f), glm::radians(yoffset), cameraRight);
-
-        cameraFront = glm::vec3(yawRot * pitchRot * glm::vec4(cameraFront, 0.0f));
-
-        // renormalize the basis after rotation
-        cameraFront = glm::normalize(cameraFront);
-        cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-        cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+        // rotate the camera
+        camera.rotate(xoffset, yoffset, 0);
     }
 }
 
@@ -285,22 +263,6 @@ void Renderer::setupObjects(){
 }
 
 
-void Renderer::setupCamera(){
-
-    // setup camera speeds and position
-    cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-    cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
-    cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    view = glm::lookAt(glm::vec3(0.0f), cameraFront, cameraUp);
-    model = glm::mat4(1.0f);
-    projection = glm::mat4(1.0f);
-
-    cameraSpeed = 1.5f;
-    sensitivity = 0.3f;
-    FOV = 45.0;
-}
 
 void Renderer::applyCamera(Shader& shaderProgram){
 
@@ -312,10 +274,10 @@ void Renderer::applyCamera(Shader& shaderProgram){
     // If camera behaviour changes to where camera can also move away form origin then translational motion of skybox
     // becomes issue
     // reason why camera is always at origin is due to double precision before casting it to floats for glm processing.
-    shaderProgram.setMat4("projection", projection);
-    shaderProgram.setMat4("model", model);
-    shaderProgram.setMat4("view", view);
-    shaderProgram.set1f("fov", FOV);
+    shaderProgram.setMat4("projection", camera.getProjection(float(SCR_WIDTH) / float(SCR_HEIGHT)));
+    shaderProgram.setMat4("model", glm::mat4(1.0f));        // currenlty all models have the same model matrix, could change in later versions
+    shaderProgram.setMat4("view", camera.getView());
+    shaderProgram.set1f("fov", camera.getFOV());
 }
 
 std::vector<glm::vec3> Renderer::generateBox(std::pair<glm::dvec3, double> boxData){
@@ -444,9 +406,6 @@ int Renderer::startRenderLoop() {
         //     std::cout << glfwGetTime() - now  << "s" << std::endl;
         // }
         
-        // update the camera projection and view matrices based on the current camera position and orientation
-        projection = glm::perspective(glm::radians(FOV), float(SCR_WIDTH) / float(SCR_HEIGHT), 0.1f, 100.0f);
-        view = glm::lookAt(glm::vec3(0.0f), cameraFront, cameraUp);
 
         // render the skybox
         // use GL EQUAL so that skybox is rendered at depth 1.0
@@ -454,7 +413,7 @@ int Renderer::startRenderLoop() {
 
 
         glBindVertexArray(vertexObjects["skyboxVAO"]);
-        updateCamera(*skyboxShader);
+        applyCamera(*skyboxShader);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -466,25 +425,25 @@ int Renderer::startRenderLoop() {
         glDepthFunc(GL_LESS);
 
         // first render the classical data
-        std::vector<glm::vec4> classicalRenderData = simulation.getClassicalRenderData(cameraPos);
+        std::vector<glm::vec4> classicalRenderData = simulation.getClassicalRenderData(camera.getPosition());
         int pointsClassical = static_cast<int>(classicalRenderData.size());
         
         glBindVertexArray(vertexObjects["VAO"]);
         glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["VBO"]);
 
-        updateCamera(*classicalShader);
+        applyCamera(*classicalShader);
         
         glBufferData(GL_ARRAY_BUFFER, classicalRenderData.size() * sizeof(glm::vec4), classicalRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsClassical);
         
         
         // now render the quantum data
-        std::vector<glm::vec4> quantumRenderData = simulation.getQuantumRenderData(cameraPos);
+        std::vector<glm::vec4> quantumRenderData = simulation.getQuantumRenderData(camera.getPosition());
         int pointsQuantum = static_cast<int>(quantumRenderData.size());
         
         // make sure that alpha actually works by disabling depth
         glDepthMask(GL_FALSE);
-        updateCamera(*quantumShader);
+        applyCamera(*quantumShader);
         
         glBufferData(GL_ARRAY_BUFFER, quantumRenderData.size() * sizeof(glm::vec4), quantumRenderData.data(), GL_DYNAMIC_DRAW);
         glDrawArrays(GL_POINTS, 0, pointsQuantum);
@@ -495,7 +454,7 @@ int Renderer::startRenderLoop() {
         // if octree rendering is enabled render te boxes
         if (showOctree){
             std::vector<glm::vec3> renderData;
-            std::vector<std::pair<glm::dvec3, double>> data = simulation.getOctreeRenderData(cameraPos);
+            std::vector<std::pair<glm::dvec3, double>> data = simulation.getOctreeRenderData(camera.getPosition());
             for (auto& datapoint: data){
                 std::vector<glm::vec3> boxData = generateBox(datapoint);
                 renderData.insert(renderData.end(), boxData.begin(), boxData.end());
@@ -503,7 +462,7 @@ int Renderer::startRenderLoop() {
 
             glBindVertexArray(vertexObjects["octreeVAO"]);
             glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["octreeVBO"]);
-            updateCamera(*octreeShader);
+            applyCamera(*octreeShader);
 
             glBufferData(GL_ARRAY_BUFFER, renderData.size() * sizeof(glm::vec3), renderData.data(), GL_DYNAMIC_DRAW);
             glDrawArrays(GL_LINES, 0, static_cast<int>(renderData.size()));
