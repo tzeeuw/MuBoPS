@@ -14,6 +14,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <Simulation.hh>
+#include <Shader.hh>
+#include <optional>
 #include <map>
 #include <glm/gtc/type_ptr.hpp>
 #include <filesystem>
@@ -40,7 +42,7 @@ class Renderer {
         /// @brief Constructs a Renderer with a reference to the Simulation instance.
         /// @param simulation Reference to the Simulation instance to be rendered
         Renderer(Simulation& simulation): simulation(simulation) {};
-        ~Renderer() {};
+        ~Renderer();
 
         /// @brief Initializes the GLFW window and OpenGL context for rendering.
         /// @param SCR_WIDTH Width of the window in pixels
@@ -113,7 +115,9 @@ class Renderer {
         glm::mat4 view;                                         ///< View matrix for transforming world coordinates to camera view
         glm::mat4 projection;                                   ///< Projection matrix for the perspective projection
 
-        std::map<std::string, unsigned int> shaderPrograms;     ///< Map to store shader program IDs with string keys for easy access when rendering different types of bodies (classical vs quantum)
+        std::optional<Shader> octreeShader, classicalShader;
+        std::optional<Shader> quantumShader, skyboxShader;
+
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
         std::map<std::string, ShaderUniforms> cameraLoc;        ///< Map to store uniform locations for camera transformation and projection matrices for different shader programs, allowing for easy updates to the camera view during rendering
 

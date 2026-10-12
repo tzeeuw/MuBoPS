@@ -2,6 +2,7 @@
 * This file is part of the MuBoPS project (https://github.com/tzeeuw/MuBoPS)
 */
 #include <Renderer.hh>
+#include <Shader.hh>
 #include <iostream>
 #include <fstream>
 
@@ -174,71 +175,71 @@ void Renderer::handleCursorMove(double xpos, double ypos){
 }
 
 
-unsigned int Renderer::loadShader(const char* Path, GLenum shaderType) {
+// unsigned int Renderer::loadShader(const char* Path, GLenum shaderType) {
     
-    // open file
-    std::ifstream shaderFile(Path);
-    if (!shaderFile.is_open()) {
-        std::cout << "Failed to open shader file: " << Path << std::endl;
-        return 0;
-    }
+//     // open file
+//     std::ifstream shaderFile(Path);
+//     if (!shaderFile.is_open()) {
+//         std::cout << "Failed to open shader file: " << Path << std::endl;
+//         return 0;
+//     }
     
-    // read shader file into string
-    std::string line;
-    std::string fileContents;
-    while (std::getline(shaderFile, line)) {
-        fileContents += line + "\n";
-    }
+//     // read shader file into string
+//     std::string line;
+//     std::string fileContents;
+//     while (std::getline(shaderFile, line)) {
+//         fileContents += line + "\n";
+//     }
     
-    // cast string to const char*
-    const char* shaderSource = fileContents.c_str();
+//     // cast string to const char*
+//     const char* shaderSource = fileContents.c_str();
     
-    // create the shader
-    unsigned int shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &shaderSource, NULL);
-    glCompileShader(shader);
+//     // create the shader
+//     unsigned int shader = glCreateShader(shaderType);
+//     glShaderSource(shader, 1, &shaderSource, NULL);
+//     glCompileShader(shader);
     
-    // check compilation
-    int success;
-    char infoLog[512];
+//     // check compilation
+//     int success;
+//     char infoLog[512];
     
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << Path << "\n" << infoLog << std::endl;
-    }
+//     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+//     if (!success) {
+//         glGetShaderInfoLog(shader, 512, NULL, infoLog);
+//         std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << Path << "\n" << infoLog << std::endl;
+//     }
     
-    // return the shader ID
-    return shader;
-}
-unsigned int Renderer::createShaderProgram(const char* vertPath, const char* fragPath) {
+//     // return the shader ID
+//     return shader;
+// }
+// unsigned int Renderer::createShaderProgram(const char* vertPath, const char* fragPath) {
     
-    // load vertex and fragment shaders
-    unsigned int vertexShader = loadShader(vertPath, GL_VERTEX_SHADER);
-    unsigned int fragmentShader = loadShader(fragPath, GL_FRAGMENT_SHADER);
+//     // load vertex and fragment shaders
+//     unsigned int vertexShader = loadShader(vertPath, GL_VERTEX_SHADER);
+//     unsigned int fragmentShader = loadShader(fragPath, GL_FRAGMENT_SHADER);
     
-    // create shaderprogam and link shaders
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+//     // create shaderprogam and link shaders
+//     unsigned int shaderProgram = glCreateProgram();
+//     glAttachShader(shaderProgram, vertexShader);
+//     glAttachShader(shaderProgram, fragmentShader);
+//     glLinkProgram(shaderProgram);
     
-    // check if shader program complied correctly
-    int success;
-    char infoLog[512];
+//     // check if shader program complied correctly
+//     int success;
+//     char infoLog[512];
     
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
+//     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+//     if (!success) {
+//         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+//         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+//     }
     
-    // delete the shaders as they are now linked into the program and no longer necessary
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+//     // delete the shaders as they are now linked into the program and no longer necessary
+//     glDeleteShader(vertexShader);
+//     glDeleteShader(fragmentShader);
     
-    return shaderProgram;
-}
+//     return shaderProgram;
+// }
 
 
 int Renderer::setupWindow(int SCR_WIDTH, int SCR_HEIGHT) {
@@ -292,11 +293,10 @@ int Renderer::setupWindow(int SCR_WIDTH, int SCR_HEIGHT) {
 
 void Renderer::setupShaders() {
     
-    // add shaders to shader program map
-    shaderPrograms["classical"] = createShaderProgram("core/shaders/point.vert", "core/shaders/classical.frag");
-    shaderPrograms["quantum"] = createShaderProgram("core/shaders/point.vert", "core/shaders/quantum.frag");
-    shaderPrograms["octree"] = createShaderProgram("core/shaders/octree.vert", "core/shaders/octree.frag");
-    shaderPrograms["skybox"] = createShaderProgram("core/shaders/skybox.vert", "core/shaders/skybox.frag");
+    skyboxShader.emplace("skybox.vert", "skybox.frag");
+    quantumShader.emplace("point.vert", "quantum.frag");
+    classicalShader.emplace("point.vert", "classical.frag");
+    octreeShader.emplace("octree.vert", "octree.frag");
 }
 
 
@@ -369,20 +369,20 @@ void Renderer::setupCamera(){
 
 
     // setup camera projection and view matrices
-    cameraLoc["classical"].projection = glGetUniformLocation(shaderPrograms["classical"], "projection");
-    cameraLoc["classical"].model = glGetUniformLocation(shaderPrograms["classical"], "model");
-    cameraLoc["classical"].view = glGetUniformLocation(shaderPrograms["classical"], "view");
-    cameraLoc["classical"].fov = glGetUniformLocation(shaderPrograms["classical"], "fov");
-    cameraLoc["quantum"].projection = glGetUniformLocation(shaderPrograms["quantum"], "projection");
-    cameraLoc["quantum"].model = glGetUniformLocation(shaderPrograms["quantum"], "model");
-    cameraLoc["quantum"].view = glGetUniformLocation(shaderPrograms["quantum"], "view");
-    cameraLoc["quantum"].fov = glGetUniformLocation(shaderPrograms["quantum"], "fov");
-    cameraLoc["octree"].projection = glGetUniformLocation(shaderPrograms["octree"], "projection");
-    cameraLoc["octree"].model = glGetUniformLocation(shaderPrograms["octree"], "model");
-    cameraLoc["octree"].view = glGetUniformLocation(shaderPrograms["octree"], "view");
-    cameraLoc["skybox"].projection = glGetUniformLocation(shaderPrograms["skybox"], "projection");
-    cameraLoc["skybox"].model = glGetUniformLocation(shaderPrograms["skybox"], "model");
-    cameraLoc["skybox"].view = glGetUniformLocation(shaderPrograms["skybox"], "view");
+    cameraLoc["classical"].projection = glGetUniformLocation(classicalShader->getShaderID(), "projection");
+    cameraLoc["classical"].model = glGetUniformLocation(classicalShader->getShaderID(), "model");
+    cameraLoc["classical"].view = glGetUniformLocation(classicalShader->getShaderID(), "view");
+    cameraLoc["classical"].fov = glGetUniformLocation(classicalShader->getShaderID(), "fov");
+    cameraLoc["quantum"].projection = glGetUniformLocation(quantumShader->getShaderID(), "projection");
+    cameraLoc["quantum"].model = glGetUniformLocation(quantumShader->getShaderID(), "model");
+    cameraLoc["quantum"].view = glGetUniformLocation(quantumShader->getShaderID(), "view");
+    cameraLoc["quantum"].fov = glGetUniformLocation(quantumShader->getShaderID(), "fov");
+    cameraLoc["octree"].projection = glGetUniformLocation(octreeShader->getShaderID(), "projection");
+    cameraLoc["octree"].model = glGetUniformLocation(octreeShader->getShaderID(), "model");
+    cameraLoc["octree"].view = glGetUniformLocation(octreeShader->getShaderID(), "view");
+    cameraLoc["skybox"].projection = glGetUniformLocation(skyboxShader->getShaderID(), "projection");
+    cameraLoc["skybox"].model = glGetUniformLocation(skyboxShader->getShaderID(), "model");
+    cameraLoc["skybox"].view = glGetUniformLocation(skyboxShader->getShaderID(), "view");
 }
 
 void Renderer::updateCamera(ShaderUniforms uniforms){
@@ -532,7 +532,7 @@ int Renderer::startRenderLoop() {
         // use GL EQUAL so that skybox is rendered at depth 1.0
         glDepthFunc(GL_LEQUAL);
 
-        glUseProgram(shaderPrograms["skybox"]);
+        skyboxShader->use();
 
         glBindVertexArray(vertexObjects["skyboxVAO"]);
         updateCamera(cameraLoc["skybox"]);
@@ -553,7 +553,7 @@ int Renderer::startRenderLoop() {
         glBindVertexArray(vertexObjects["VAO"]);
         glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["VBO"]);
 
-        glUseProgram(shaderPrograms["classical"]);
+        classicalShader->use();
         updateCamera(cameraLoc["classical"]);
         
         glBufferData(GL_ARRAY_BUFFER, classicalRenderData.size() * sizeof(glm::vec4), classicalRenderData.data(), GL_DYNAMIC_DRAW);
@@ -566,7 +566,7 @@ int Renderer::startRenderLoop() {
         
         // make sure that alpha actually works by disabling depth
         glDepthMask(GL_FALSE);
-        glUseProgram(shaderPrograms["quantum"]);
+        quantumShader->use();
         updateCamera(cameraLoc["quantum"]);
         
         glBufferData(GL_ARRAY_BUFFER, quantumRenderData.size() * sizeof(glm::vec4), quantumRenderData.data(), GL_DYNAMIC_DRAW);
@@ -586,7 +586,7 @@ int Renderer::startRenderLoop() {
 
             glBindVertexArray(vertexObjects["octreeVAO"]);
             glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["octreeVBO"]);
-            glUseProgram(shaderPrograms["octree"]);
+            octreeShader->use();
             updateCamera(cameraLoc["octree"]);
             glBufferData(GL_ARRAY_BUFFER, renderData.size() * sizeof(glm::vec3), renderData.data(), GL_DYNAMIC_DRAW);
             glDrawArrays(GL_LINES, 0, static_cast<int>(renderData.size()));
@@ -599,10 +599,6 @@ int Renderer::startRenderLoop() {
     }
     
     // delete shaders and buffers, terminate GLFW
-    glDeleteProgram(shaderPrograms["classical"]);
-    glDeleteProgram(shaderPrograms["quantum"]);
-    glDeleteProgram(shaderPrograms["octree"]);
-    glDeleteProgram(shaderPrograms["skybox"]);
     glDeleteBuffers(1, &vertexObjects["octreeVBO"]);
     glDeleteVertexArrays(1, &vertexObjects["octreeVAO"]);
     glDeleteBuffers(1, &vertexObjects["VBO"]);
@@ -610,7 +606,19 @@ int Renderer::startRenderLoop() {
     glDeleteBuffers(1, &vertexObjects["skyboxVBO"]);
     glDeleteBuffers(1, &vertexObjects["skyboxEBO"]);
     glDeleteVertexArrays(1, &vertexObjects["skyboxVAO"]);
-    glfwTerminate();
+    glDeleteTextures(1, &cubemapTexture);
     
     return 0;
+}
+
+
+Renderer::~Renderer() {
+
+    // requires custom destructor so that shaders are deleted before glfw is terminated
+    classicalShader.reset();
+    quantumShader.reset();
+    octreeShader.reset();
+    skyboxShader.reset();
+
+    glfwTerminate();
 }

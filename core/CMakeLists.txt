@@ -3,7 +3,8 @@ set(SOURCE_FILES
     src/Simulation.cpp
     src/QuantumBody.cpp
     src/Renderer.cpp
-    src/Octree.cpp)
+    src/Octree.cpp
+    src/Shader.cpp)
 
 
 if(NOT CMAKE_BUILD_TYPE)
