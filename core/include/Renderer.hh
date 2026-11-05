@@ -16,6 +16,7 @@
 #include <Simulation.hh>
 #include <Shader.hh>
 #include <Camera.hh>
+#include <Input.hh>
 #include <optional>
 #include <map>
 #include <glm/gtc/type_ptr.hpp>
@@ -54,16 +55,10 @@ class Renderer {
         
         /// @name Event handling methods
         /// @{
-        void processInput(GLFWwindow* window);
+        void processInput();
         
         static void onResize(GLFWwindow* window, int width, int height);
         void handleResize(int width, int height);
-        
-        static void onMouseClick(GLFWwindow* window, int button, int action, int mods);
-        void handleMouseClick(int button, int action, int mods);
-        
-        static void onCursorMove(GLFWwindow* window, double xpos, double ypos);
-        void handleCursorMove(double xpos, double ypos);
 
         static void onScroll(GLFWwindow* window, double xoffset, double yoffset);
         void handleScroll(double yoffset);
@@ -99,6 +94,9 @@ class Renderer {
         std::optional<Shader> quantumShader, skyboxShader;
 
         Camera camera;
+
+        // make input an optional so that it can be emplaced after setup window
+        std::optional<Input> input;
 
         std::map<std::string, unsigned int> vertexObjects;      ///< Map to store vertex array and buffer object IDs with string keys for easy access when setting up vertex data for rendering
 

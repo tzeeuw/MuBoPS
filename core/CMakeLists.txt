@@ -5,7 +5,8 @@ set(SOURCE_FILES
     src/Renderer.cpp
     src/Octree.cpp
     src/Shader.cpp
-    src/Camera.cpp)
+    src/Camera.cpp
+    src/Input.cpp)
 
 
 if(NOT CMAKE_BUILD_TYPE)

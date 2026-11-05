@@ -9,15 +9,15 @@ class Camera {
     public:
 
 
-        glm::mat4 getProjection(float aspect) const;
-        glm::mat4 getView() const;
+        glm::mat4 getProjection(float aspect) const {return glm::perspective(glm::radians(FOV), aspect, 0.1f, 100.0f);}
+        glm::mat4 getView() const {return glm::lookAt(glm::vec3(0.0f), front, up);}
         glm::dvec3 getPosition() const {return position;}
         float getFOV() const {return FOV;}
 
 
-        void moveForward(float distance);
-        void moveRight(float distance);
-        void moveUp(float distance);
+        void moveForward(float distance) {position += distance * front;}
+        void moveRight(float distance) {position += distance * right;}
+        void moveUp(float distance) {position += distance * up;}
 
         void rotate(float yaw, float pitch, float roll);
         void zoom(double delta);

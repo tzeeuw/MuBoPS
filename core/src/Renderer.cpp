@@ -9,149 +9,32 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+void Renderer::processInput() {
+    InputState in = input->update(deltaTime);
 
-void Renderer::processInput(GLFWwindow* window) {
+    // set all movements based on the InputState values
+    camera.moveForward(in.moveForward);
+    camera.moveRight(in.moveRight);
+    camera.moveUp(in.moveUp);
+    camera.rotate(in.yaw,in.pitch,in.roll);
+    camera.zoom(in.zoom);
 
-    // close the window if the escape key is pressed
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    // input state returns if the octree should be toggled, not if it is on or off
+    if (in.toggleOctree) {
+        showOctree = !showOctree;
+    }
+
+    if (in.shouldClose) {
         glfwSetWindowShouldClose(window, true);
     }
-
-    float velocity = cameraSpeed * deltaTime;
-    float rollSpeed = cameraSpeed * 0.5f;
-
-    // WASD input
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.moveForward(velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.moveForward(-velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.moveRight(-velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.moveRight(velocity);
-    }
-
-    // up and down
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        camera.moveUp(velocity);
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        camera.moveUp(-velocity);
-    }
-
-    // rol on q and e
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        camera.rotate(0, 0, rollSpeed);
-    }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        camera.rotate(0, 0, -rollSpeed);
-    }
-
-    // shift for speeding of camera
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        cameraSpeed = 3.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
-        cameraSpeed = 1.5f;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-        octreePressed = true;
-    }
-    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE) {
-        if (octreePressed){
-            showOctree = !showOctree;
-            octreePressed = false;
-        }
-    }
 }
 
 
+// scrolling only allows for callbacks so it is required to be done this way
 void Renderer::onScroll(GLFWwindow* window, double xoffset, double yoffset) {
     Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
-    renderer->handleScroll(yoffset);
+    renderer->input->setScroll(yoffset);
 }
-
-void Renderer::handleScroll(double yoffset) {
-    camera.zoom(yoffset);
-}
-
-void Renderer::onResize(GLFWwindow* window, int width, int height) {
-
-    // get the Renderer instance from the window user pointer and call the non-static resize handler
-    Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
-    renderer->handleResize(width, height);
-}
-
-void Renderer::handleResize(int width, int height) {
-    this->SCR_WIDTH = width;
-    this->SCR_HEIGHT = height;
-    glViewport(0, 0, width, height);
-}
-
-
-void Renderer::onMouseClick(GLFWwindow* window, int button, int action, int mods) {
-
-    // get the Renderer instance from the window user pointer and call the non-static mouse click handler
-    Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
-    renderer->handleMouseClick(button, action, mods);
-}
-
-void Renderer::handleMouseClick(int button, int action, int mods) {
-    // if the left mouse button is pressed, set the mousePressed flag to true so that camera is updated
-    if (button == GLFW_MOUSE_BUTTON_LEFT){
-        if (action == GLFW_PRESS) {
-            mousePressed = true;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
-        else if (action == GLFW_RELEASE) {
-            mousePressed = false;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            firstPress = true;
-        }
-    }
-    
-}
-
-
-void Renderer::onCursorMove(GLFWwindow* window, double xpos, double ypos) {
-
-    // get the Renderer instance from the window user pointer and call the non-static cursor move handler
-    Renderer* renderer = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
-    renderer->handleCursorMove(xpos, ypos);
-}
-
-void Renderer::handleCursorMove(double xpos, double ypos){
-
-    // update camera position based on mouse movement if the left mouse button is pressed
-    if (mousePressed) {
-
-        // prevent jitter during the first press of the mouse button
-        if (firstPress) {
-            lastX = xpos;
-            lastY = ypos;
-            firstPress = false;
-        }
-
-        // calculate the offset of the mouse movement
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos;       // range is from bottom to top so reverse
-
-        lastX = xpos;
-        lastY = ypos;
-
-        // apply sensitivity to the mouse movement
-        xoffset *= sensitivity;
-        yoffset *= sensitivity;
-
-        // rotate the camera
-        camera.rotate(xoffset, yoffset, 0);
-    }
-}
-
 
 
 int Renderer::setupWindow(int SCR_WIDTH, int SCR_HEIGHT) {
@@ -193,18 +76,18 @@ int Renderer::setupWindow(int SCR_WIDTH, int SCR_HEIGHT) {
 
     glViewport(0, 0, int(SCR_WIDTH), int(SCR_HEIGHT));
 
-    // set all callbacks
-    glfwSetFramebufferSizeCallback(window, onResize);
-    glfwSetMouseButtonCallback(window, onMouseClick);
-    glfwSetCursorPosCallback(window, onCursorMove);
+    // set scroll callback as it has no GLFW getter function
     glfwSetScrollCallback(window, onScroll);
+
+    // emplace input with the window so that input can read the user inputs in the window
+    input.emplace(window);
 
     return 0;
 }
 
 
 void Renderer::setupShaders() {
-    
+    // create all the shaders
     skyboxShader.emplace("skybox.vert", "skybox.frag");
     quantumShader.emplace("point.vert", "quantum.frag");
     classicalShader.emplace("point.vert", "classical.frag");
@@ -391,7 +274,17 @@ int Renderer::startRenderLoop() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window);
+        processInput();
+
+        // handle window resizing
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        if ((width != SCR_WIDTH) || (width != SCR_HEIGHT)) {
+            glViewport(0, 0, width, height);
+            SCR_WIDTH = width;
+            SCR_HEIGHT = height;
+        }
+
         // // background color
         // glClearColor(7.0/255.0, 15.0/255.0, 28.0/255.0, 1.0f);
 

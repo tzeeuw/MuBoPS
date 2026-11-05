@@ -4,27 +4,6 @@
 
 #include <Camera.hh>
 
-glm::mat4 Camera::getProjection(float aspect) const{
-    return glm::perspective(glm::radians(FOV), aspect, 0.1f, 100.0f);
-}
-
-
-glm::mat4 Camera::getView() const{
-    return glm::lookAt(glm::vec3(0.0f), front, up);
-}
-
-
-void Camera::moveForward(float distance) {
-    position += distance * front; 
-}
-
-void Camera::moveRight(float distance) {
-    position += distance * right;
-}
-
-void Camera::moveUp(float distance) {
-    position += distance * up;
-}
 
 // input is in degrees
 void Camera::rotate(float yaw, float pitch, float roll) {
