@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(mubops VERSION 0.4.0)
+project(mubops VERSION 0.4.1)
 
 
 # --- Windows-only: make sure every target uses the DYNAMIC C runtime (/MD or /MDd) ---
