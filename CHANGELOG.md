@@ -3,7 +3,7 @@
 - Added MacOS support
 - SkyBox
 ## proposed changes
-- Splitting up renderer class into Skybox, Shaders, Camera and new Renderer class.
+- Splitting up renderer class into Input, Shaders, Camera and new Renderer class.
 
 
 ## [0.4.0] 2026-05-01

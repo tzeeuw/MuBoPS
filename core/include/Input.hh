@@ -38,6 +38,7 @@ class Input {
         float rollSpeed = 25.0f;
         float sensitivity = 0.3f;
         float scroll = 0.0f;
+        bool kPressed = false;
 
         glm::vec2 mousePos = {0.0f, 0.0f};
         glm::vec2 nextMousePos = {0.0f, 0.0f};

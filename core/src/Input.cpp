@@ -40,7 +40,17 @@ InputState Input::update(float deltaTime) {
 
     // all toggables
     in.shouldClose = (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
-    in.toggleOctree = (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS);
+    
+    // separate octree handling with flags
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        kPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE) {
+        if (kPressed) {
+            in.toggleOctree = true;
+            kPressed = false;
+        }
+    }
 
     // set speed based on shift key
     // FIXME: moveSpeed and rollSPeed are now set here, fix so that it can be changed in a single setting
