@@ -26,7 +26,7 @@
 class ClassicalBody : public Body {
     public:
         ClassicalBody(){};
-        ~ClassicalBody() {return;};
+        ~ClassicalBody() {};
 
         /// @brief Advances the body's state by one timestep using Newtonian mechanics.
         /// @param dt Timestep in seconds

@@ -194,9 +194,9 @@ void Octree::createChildren(OctreeNode* node) {
     node->data = children;
 }
 
-std::vector<std::pair<glm::dvec3, double>> Octree::getRenderData(glm::dvec3 cameraPos, bool leavesOnly){
+std::vector<std::pair<glm::dvec3, glm::dvec3>> Octree::getRenderData(glm::dvec3 cameraPos, bool leavesOnly){
 
-    std::vector<std::pair<glm::dvec3, double>> renderData;
+    std::vector<std::pair<glm::dvec3, glm::dvec3>> renderData;
 
     // pass renderData as reference to conserve memory
     getRenderDataHelper(rootNode.get(), cameraPos, leavesOnly, renderData);
@@ -204,18 +204,27 @@ std::vector<std::pair<glm::dvec3, double>> Octree::getRenderData(glm::dvec3 came
     return renderData;
 }
 
-void Octree::getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData){
+void Octree::getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, glm::dvec3>>& renderData){
     std::visit([&](auto& data) {
         using T = std::decay_t<decltype(data)>;
 
         // if it is a leave just add the render data
         if constexpr (std::is_same_v<T, OctreeNode::Leaf>) {
-            renderData.push_back(std::pair<glm::dvec3, double>(node->position - cameraPos, node->halfLength));
+
+            // make it vector for rendering
+            glm::dvec3 halfLength{1.0,1.0,1.0};
+            halfLength *= node->halfLength;
+
+            renderData.push_back(std::pair<glm::dvec3, glm::dvec3>(node->position - cameraPos, halfLength));
         }
         // if it is a node add the node data if leavesonly is false and add all child data
         else if constexpr (std::is_same_v<T, OctreeNode::Node>) {
             if (!leavesOnly){
-                renderData.push_back(std::pair<glm::dvec3, double>(node->position - cameraPos, node->halfLength));
+                // make it vector for rendering
+                glm::dvec3 halfLength{1.0,1.0,1.0};
+                halfLength *= node->halfLength;
+
+                renderData.push_back(std::pair<glm::dvec3, glm::dvec3>(node->position - cameraPos, halfLength));
             }
 
             // for each child add the render data

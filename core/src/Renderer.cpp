@@ -90,6 +90,7 @@ void Renderer::setupShaders() {
     // create all the shaders
     skyboxShader.emplace("skybox.vert", "skybox.frag");
     quantumShader.emplace("point.vert", "quantum.frag");
+    rectShader.emplace("rectangle.vert", "rectangle.frag");
     classicalShader.emplace("point.vert", "classical.frag");
     octreeShader.emplace("octree.vert", "octree.frag");
 }
@@ -142,12 +143,27 @@ void Renderer::setupObjects(){
     vertexObjects["skyboxVBO"] = skyboxVBO;
     vertexObjects["skyboxVAO"] = skyboxVAO;
     vertexObjects["skyboxEBO"] = skyboxEBO;
-    
+
+    // rectangle VAO and VBO
+    unsigned int rectVAO, rectVBO, rectEBO;
+    glGenVertexArrays(1, &rectVAO);
+    glGenBuffers(1, &rectVBO);
+    glGenBuffers(1, &rectEBO);
+    glBindVertexArray(rectVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    vertexObjects["rectVBO"] = rectVBO;
+    vertexObjects["rectVAO"] = rectVAO;
+    vertexObjects["rectEBO"] = rectEBO;
 }
 
 
 
-void Renderer::applyCamera(Shader& shaderProgram){
+void Renderer::applyCamera(Shader& shaderProgram, glm::mat4 model){
 
     // first use the program
     shaderProgram.use();
@@ -158,12 +174,12 @@ void Renderer::applyCamera(Shader& shaderProgram){
     // becomes issue
     // reason why camera is always at origin is due to double precision before casting it to floats for glm processing.
     shaderProgram.setMat4("projection", camera.getProjection(float(SCR_WIDTH) / float(SCR_HEIGHT)));
-    shaderProgram.setMat4("model", glm::mat4(1.0f));        // currenlty all models have the same model matrix, could change in later versions
+    shaderProgram.setMat4("model", model);        // currenlty all models have the same model matrix, could change in later versions
     shaderProgram.setMat4("view", camera.getView());
     shaderProgram.set1f("fov", camera.getFOV());
 }
 
-std::vector<glm::vec3> Renderer::generateBox(std::pair<glm::dvec3, double> boxData){
+std::vector<glm::vec3> Renderer::generateBox(std::pair<glm::dvec3, glm::dvec3> boxData){
     std::vector<glm::vec3> renderData;
     glm::dvec3 offset({0.0,0.0,0.0});
     int indexpairs[3][2] = {
@@ -344,10 +360,31 @@ int Renderer::startRenderLoop() {
         // enable it after rendering the quantum points
         glDepthMask(GL_TRUE);
 
+
+        // // render rectangles
+        std::vector<glm::vec3> renderData;
+        std::vector<std::pair<glm::dvec3, glm::dvec3>> rectRenderData = simulation.getRectRenderData(camera.getPosition());
+    
+        applyCamera(*rectShader);
+        glBindVertexArray(vertexObjects["rectVAO"]);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexObjects["rectVBO"]);
+
+        for (auto& [position, sideLengths]: rectRenderData) {
+
+            // times 0.5f as the unscaled box spans -1 to 1 so already has a length of 2 i.e. is not unit length.
+            glm::mat4 rectModel = glm::translate(glm::mat4(1.0f), glm::vec3{position}) * glm::scale(glm::mat4(1.0f), glm::vec3{sideLengths} * 0.5f);
+
+            rectShader->setMat4("model", rectModel);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        }
+
+        glBindVertexArray(0);
+
         // if octree rendering is enabled render te boxes
         if (showOctree){
             std::vector<glm::vec3> renderData;
-            std::vector<std::pair<glm::dvec3, double>> data = simulation.getOctreeRenderData(camera.getPosition());
+            std::vector<std::pair<glm::dvec3, glm::dvec3>> data = simulation.getOctreeRenderData(camera.getPosition());
+
             for (auto& datapoint: data){
                 std::vector<glm::vec3> boxData = generateBox(datapoint);
                 renderData.insert(renderData.end(), boxData.begin(), boxData.end());
@@ -376,6 +413,9 @@ int Renderer::startRenderLoop() {
     glDeleteBuffers(1, &vertexObjects["skyboxEBO"]);
     glDeleteVertexArrays(1, &vertexObjects["skyboxVAO"]);
     glDeleteTextures(1, &cubemapTexture);
+    glDeleteBuffers(1, &vertexObjects["rectVBO"]);
+    glDeleteBuffers(1, &vertexObjects["rectEBO"]);
+    glDeleteVertexArrays(1, &vertexObjects["rectVAO"]);
     
     return 0;
 }
@@ -388,6 +428,7 @@ Renderer::~Renderer() {
     quantumShader.reset();
     octreeShader.reset();
     skyboxShader.reset();
+    rectShader.reset();
 
     glfwTerminate();
 }

@@ -56,19 +56,15 @@ class Renderer {
         /// @name Event handling methods
         /// @{
         void processInput();
-        
-        static void onResize(GLFWwindow* window, int width, int height);
-        void handleResize(int width, int height);
 
         static void onScroll(GLFWwindow* window, double xoffset, double yoffset);
-        void handleScroll(double yoffset);
         
-        void applyCamera(Shader& shaderProgram);
+        void applyCamera(Shader& shaderProgram, glm::mat4 model = glm::mat4(1.0f));
         /// @}
             
         /// @name Shader utility methods
         /// @{
-        std::vector<glm::vec3> generateBox(std::pair<glm::dvec3, double> boxData);
+        std::vector<glm::vec3> generateBox(std::pair<glm::dvec3, glm::dvec3> boxData);
         /// @}
 
     private:
@@ -78,20 +74,14 @@ class Renderer {
         float SCR_WIDTH;                                        ///< Width of the window in pixels, stored for use in projection matrix calculations and resizing
         float SCR_HEIGHT;                                       ///< Height of the window in pixels, stored for use in projection matrix calculations and resizing
         
-        bool mousePressed = false;                              ///< Flag to track whether the left mouse button is currently pressed, used for enabling camera rotation based on mouse movement
-        bool firstPress = true;                                 ///< Flag to track the initial state of mouse press, used to prevent sudden jumps in camera orientation when the mouse is first pressed
         bool showOctree = false;
-        bool octreePressed = false;
-        float lastX = 400.0f;                                   ///< Initial last X position of the mouse, set to the center of the window for calculating mouse movement offsets
-        float lastY = 400.0f;                                   ///< Initial last Y position of the mouse, set to the center of the window for calculating mouse movement offsets
                                   
-        float cameraSpeed = 1.5f;                                      ///< Speed of camera for keyboard input
-        float sensitivity = 0.3f;                                      ///< Speed of camera for mouse input
         float deltaTime = 0.0f;     // keep track of frame generation speed
         float lastFrame = 0.0f;
         
         std::optional<Shader> octreeShader, classicalShader;
         std::optional<Shader> quantumShader, skyboxShader;
+        std::optional<Shader> rectShader;
 
         Camera camera;
 

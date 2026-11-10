@@ -4,6 +4,7 @@
 #include <Simulation.hh>
 #include <ClassicalBody.hh>
 #include <QuantumBody.hh>
+#include <RectangularBody.hh>
 #include <iostream>
 #include <GLFW/glfw3.h>
 
@@ -157,5 +158,22 @@ std::vector<glm::vec4> Simulation::getClassicalRenderData(const glm::dvec3& came
     for (auto& dataPoint : renderData) {
         dataPoint[3] = (dataPoint[3] - minVal) / (maxVal - minVal);
     }
+    return renderData;
+}
+
+
+std::vector<std::pair<glm::dvec3, glm::dvec3>> Simulation::getRectRenderData(glm::dvec3 cameraPos) {
+    std::vector<std::pair<glm::dvec3, glm::dvec3>> renderData;
+
+    for (auto& body: bodies) {
+        RectangularBody* rectBody = dynamic_cast<RectangularBody*>(body.get());
+        if (rectBody) {
+            std::pair<glm::dvec3, glm::dvec3> bodyData;
+            bodyData.first = rectBody->getPosition() - cameraPos;
+            bodyData.second = rectBody->getSideLengths();
+            renderData.insert(renderData.end(), bodyData);
+        }
+    }
+
     return renderData;
 }

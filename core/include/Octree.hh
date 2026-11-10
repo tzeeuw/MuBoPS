@@ -51,7 +51,7 @@ class Octree {
         /// @param cameraPos Position of the camera for view-dependent calculations
         /// @param leavesOnly Flag to indicate whether to include only leaf nodes in the render data
         /// @return Vector of pairs containing position and intensity values for rendering
-        std::vector<std::pair<glm::dvec3, double>> getRenderData(glm::dvec3 cameraPos, bool leavesOnly = false);
+        std::vector<std::pair<glm::dvec3, glm::dvec3>> getRenderData(glm::dvec3 cameraPos, bool leavesOnly = false);
 
         /// @brief  Performs the Barnes-Hut algorithm to calculate mass aggregates for a given position in space.
         /// @param position Position in space for which to calculate the mass aggregate
@@ -69,7 +69,7 @@ class Octree {
         void createChildren(OctreeNode* node);
         void computeCOM(OctreeNode* node);
         OctreeNode* findClosestChildNode(std::shared_ptr<Body> body, OctreeNode* node);
-        void getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, double>>& renderData);
+        void getRenderDataHelper(OctreeNode* node, glm::dvec3 cameraPos, bool leavesOnly, std::vector<std::pair<glm::dvec3, glm::dvec3>>& renderData);
         void printTreeHelper(OctreeNode* node, int depth);
         void BarnesHutHelper(OctreeNode* node, glm::dvec3 position, double theta, std::vector<MassAggregate>& masses);
 

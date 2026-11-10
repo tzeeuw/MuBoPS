@@ -6,7 +6,8 @@ set(SOURCE_FILES
     src/Octree.cpp
     src/Shader.cpp
     src/Camera.cpp
-    src/Input.cpp)
+    src/Input.cpp
+    src/RectangularBody.cpp)
 
 
 if(NOT CMAKE_BUILD_TYPE)

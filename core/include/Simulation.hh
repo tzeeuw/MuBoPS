@@ -50,8 +50,8 @@ class Simulation {
         /// @{
         std::vector<glm::vec4> getClassicalRenderData(const glm::dvec3& cameraPos);
         std::vector<glm::vec4> getQuantumRenderData(const glm::dvec3& cameraPos);
-        std::vector<std::pair<glm::dvec3, double>> getOctreeRenderData(glm::dvec3 cameraPos) {return octree.getRenderData(cameraPos);};
-
+        std::vector<std::pair<glm::dvec3, glm::dvec3>> getOctreeRenderData(glm::dvec3 cameraPos) {return octree.getRenderData(cameraPos);};
+        std::vector<std::pair<glm::dvec3, glm::dvec3>> getRectRenderData(glm::dvec3 cameraPos);
         /// @}
         
         
