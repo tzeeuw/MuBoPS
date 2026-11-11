@@ -52,10 +52,14 @@ int main() {
     // auto qbody = std::make_unique<QuantumBody>(100,100,100);
     // bodies.push_back(std::move(qbody));
 
-    std::shared_ptr<Body> rectBody = std::make_shared<RectangularBody>(glm::dvec3{0,0,-5}, glm::dvec3{1,2,3});
+    std::shared_ptr<Body> rectBody = std::make_shared<RectangularBody>(glm::dvec3{0,0,0}, glm::dvec3{10, 1, 1});
+    rectBody->setVelocity(glm::dvec3{0, 0.0, 0});
+    rectBody->setAcceleration(glm::dvec3{0.0, 0.0, 0.0});
     sim.addBody(rectBody);
 
-    std::shared_ptr<Body> rectBody2 = std::make_shared<RectangularBody>(glm::dvec3{0,3,-5}, glm::dvec3{1,2,3});
+    std::shared_ptr<Body> rectBody2 = std::make_shared<RectangularBody>(glm::dvec3{4, 0.9, 0}, glm::dvec3{1,1,1});
+    rectBody2->setVelocity(glm::dvec3{0.0, -0.0, 0});
+    rectBody2->setAcceleration(glm::dvec3{0.0, 0.0, 0.0});
     sim.addBody(rectBody2);
 
 

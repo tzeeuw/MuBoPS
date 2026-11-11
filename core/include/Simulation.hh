@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <Units.hh>
 #include <Octree.hh>
+#include <RectangularBody.hh>
 
 
 /**
@@ -45,6 +46,8 @@ class Simulation {
         void update(double dt);
         void updateGravity(double dt);
         void updateGravityBH(std::shared_ptr<Body>& body, double theta, double eps);
+
+        bool checkCollision(RectangularBody* firstBody, RectangularBody* secondBody);
 
         /// @name Data retrieval for rendering
         /// @{

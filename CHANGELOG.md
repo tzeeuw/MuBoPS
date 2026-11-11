@@ -1,3 +1,8 @@
+## [0.5.0] Upcoming release
+## Added
+- Added rectangles and squares to the simulation
+
+
 ## [0.4.1] 05-11-2026
 ## Added
 - Added MacOS support

@@ -10,7 +10,7 @@ dz = 4
 max_length = np.sqrt(dx**2 + dy**2 + dz**2)/2
 angles = np.linspace(0, 2 * np.pi, 100)
 
-vec = -np.array([1.9, 2.0, 0])
+vec = -np.array([3, -3.1, 0])
 scaled_vec = vec.copy()
 sidelengths = np.array([dx/2, dy/2, dz/2])
 

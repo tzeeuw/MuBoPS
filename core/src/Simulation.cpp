@@ -10,6 +10,12 @@
 
 double avg = 0.0;
 
+// retrieves index of max value in a 3d vec
+int maxIndex(const glm::dvec3& v) {
+    return (v.x >= v.y) ? ((v.x >= v.z) ? 0 : 2) : ((v.y >= v.z) ? 1 : 2);
+}
+
+
 void Simulation::removeBody(std::shared_ptr<Body>& body) {
 
     // find the body in the vector and remove it
@@ -51,8 +57,18 @@ void Simulation::update(double dt) {
     // double t2 = glfwGetTime();
     // octree.debugPrint();
     // updateGravity(dt);
+
+    // VERY UGLY FIX LATER BUT FOR NOW A CHECK
+    RectangularBody* rectBody = dynamic_cast<RectangularBody*>(bodies[0].get());
+    RectangularBody* rectBody2 = dynamic_cast<RectangularBody*>(bodies[1].get());
+    if (rectBody && rectBody2) {
+        bool collides = checkCollision(rectBody, rectBody2);
+        if (collides) {
+            std::cout << "they are colliding!" << std::endl;
+        }
+    }
     for (auto& body: bodies) {
-        updateGravityBH(body, 0.8, 1e-2);
+        // updateGravityBH(body, 0.8, 1e-2);
         body->update(dt, units);
     }
     // double t3 = glfwGetTime();
@@ -176,4 +192,73 @@ std::vector<std::pair<glm::dvec3, glm::dvec3>> Simulation::getRectRenderData(glm
     }
 
     return renderData;
+}
+
+
+
+bool Simulation::checkCollision(RectangularBody* firstBody, RectangularBody* secondBody){
+    
+    // calculate distance and minimum distance for collision required
+    glm::dvec3 firstPosition = firstBody->getPosition();
+    glm::dvec3 secondPosition = secondBody->getPosition();
+    double distance = glm::length(firstPosition - secondPosition);
+    double collisionDistance = firstBody->getHalfDiagonal() + secondBody->getHalfDiagonal();
+    
+    // return false if bodies are far enough apart
+    if (distance > collisionDistance) {
+        return false;
+    }
+    
+    // this computation is done keeping in mind that bodies will rotate, meaning that the collision vectors of each body needs to be calculated
+    // distanceVector points from the SECOND body to the FIRST body
+    glm::dvec3 distanceVector = firstPosition - secondPosition;
+    glm::dvec3 firstSLHalf = firstBody->getSideLengths() / 2.0;
+    glm::dvec3 secondSLHalf = secondBody->getSideLengths() / 2.0;
+
+    // here we add some rotation matrix so that the vector is rotated into the coordinates of the rectangle, but that is for later
+    // add rotation here
+
+    // here we calculate which component is furthest away from its half sidelength
+    // this tells us which component should be used to scale the distanceVector so that we find the point on the edge
+    // of the object that corresponds with the collision
+    glm::dvec3 firstSubtractedVector = glm::abs(distanceVector) - firstSLHalf;
+    glm::dvec3 secondSubtractedVector = glm::abs(distanceVector) - secondSLHalf;
+    int firstMaxIndex = maxIndex(firstSubtractedVector);
+    int secondMaxIndex = maxIndex(secondSubtractedVector);
+
+    // std::cout << firstSubtractedVector.x << firstSubtractedVector.y << firstSubtractedVector.z
+    // << "\n" << secondSubtractedVector.x << secondSubtractedVector.y << secondSubtractedVector.z << std::endl;
+    // std::cout << "firstMaxIndex: "<< firstMaxIndex << " secondMaxIndex: " << secondMaxIndex << std::endl;
+
+    // find the scales for the two collisionVectors
+    // the firstScale is times -1.0 because the distanceVector goes from SECOND to FIRST, so we have to invert it
+    double firstScale = -1.0 * firstSLHalf[firstMaxIndex] / distanceVector[firstMaxIndex];
+    double secondScale = secondSLHalf[secondMaxIndex] / distanceVector[secondMaxIndex];
+
+    // calculate the collisionVectors
+    glm::dvec3 firstCollisionVector = distanceVector * firstScale * glm::sign(distanceVector[firstMaxIndex]);
+    glm::dvec3 secondCollisionVector = distanceVector * secondScale * glm::sign(distanceVector[secondMaxIndex]);
+
+
+    // if the sum of the length collision vectors is greater or equal to the distance between the two bodies
+    // means that they are clipping and thus collision occured
+    double clippingLength = glm::length(firstCollisionVector) + glm::length(secondCollisionVector);
+
+    // std::cout << clippingLength << std::endl;
+    if (clippingLength < distance){
+        return false;
+    }
+
+    // now set the collision vectors so that further calculations do not have to recompute it
+    // the reason the computation is done here is because it is needed to be done here due to the rotation of the rectangles
+    firstBody->setCollisionVector(firstCollisionVector);
+    secondBody->setCollisionVector(secondCollisionVector);
+
+
+    // using the seperating axes theorem or hyperplane separation theorem, we can check if the boxes collide
+    // Later when adding rotations, we just have to add more axes instead so the fundamental codes stay the same
+
+
+    return true;
+
 }
